@@ -2,13 +2,13 @@ import time
 import RPi.GPIO as GPIO
 import sys
 
-laser1_pin = 18
+laser1_pin = 12
 
 
-stepper_pin_A = 2
-stepper_pin_B = 3
-stepper_pin_C = 4
-stepper_pin_D = 14
+stepper_pin_A = 11
+stepper_pin_B = 13
+stepper_pin_C = 15
+stepper_pin_D = 8
 
 stepper_position = 0
 stepper_full_rotation=4096/2*3
@@ -19,7 +19,7 @@ stepper_steps = [8+1, 4+8, 2+4, 1+2]
 def stepper_init():
     global stepper_position
     gpio_list = [stepper_pin_A,stepper_pin_B,stepper_pin_C,stepper_pin_D]
-    GPIO.setmode(GPIO.BCM)
+    GPIO.setmode(GPIO.BOARD)
     GPIO.setup(gpio_list, GPIO.OUT)
     stepper_position = 0
     stepper_off()
@@ -58,7 +58,7 @@ def stepper_goto(pos, direction = 1, delay = 0.003, turn_off = True):
 
 def laser_init():
     gpio_list = [laser1_pin]
-    GPIO.setmode(GPIO.BCM)
+    GPIO.setmode(GPIO.BOARD)
     GPIO.setup(gpio_list, GPIO.OUT)
     laser_off()
 
