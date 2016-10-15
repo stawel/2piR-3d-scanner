@@ -9,8 +9,7 @@ def nothing(x):
     pass
 
 def rotate(img):
-    #return cv2.flip(cv2.transpose(img),0)
-    return img
+    return cv2.flip(cv2.transpose(img),0)
 
 # Load an color image in grayscale
 img1 = cv2.imread(name1,cv2.IMREAD_COLOR)
@@ -49,9 +48,9 @@ def add_window(a,b,name ,blur,  tr):
     cv2.imshow(name ,img)
 
 
-add_window(g2,g1,'g: cv2.THRESH_BINARY+cv2.THRESH_OTSU',True, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-add_window(r2,r1,'r: cv2.THRESH_BINARY+cv2.THRESH_OTSU',True, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-add_window(b2,b1,'b: cv2.THRESH_BINARY+cv2.THRESH_OTSU',True, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+add_window(g2,g1,'g',True, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+add_window(r2,r1,'r',True, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+add_window(b2,b1,'b',True, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
 
 rgb2 = b2>>2
 rgb2 +=r2>>2
@@ -61,8 +60,8 @@ rgb1 +=r1>>2
 rgb1 +=g1>>2
 
 
-add_window(rgb2,rgb1,'rgb: cv2.THRESH_BINARY',False, cv2.THRESH_BINARY) #cv2.THRESH_TOZERO)
-add_window(rgb2,rgb1,'rgb: cv2.THRESH_BINARY+cv2.THRESH_OTSU',False, cv2.THRESH_BINARY+cv2.THRESH_OTSU) #cv2.THRESH_TOZERO)
+add_window(rgb2,rgb1,'rgb',False, cv2.THRESH_BINARY) #cv2.THRESH_TOZERO)
+add_window(rgb2,rgb1,'rgb2',False, cv2.THRESH_BINARY+cv2.THRESH_OTSU) #cv2.THRESH_TOZERO)
 
 
 
@@ -102,7 +101,7 @@ a = np.argwhere(img_tt)
 #a.view('int32,int32') #.sort(order=['f1'],axis=0)
 rp = reduce_pix(a)
 #print a
-name = 'points, rgb: cv2.THRESH_BINARY+cv2.THRESH_OTSU'
+name = 'ala'
 cv2.namedWindow(name, cv2.WINDOW_NORMAL)
 cv2.imshow(name ,img_tt)
 
@@ -110,9 +109,8 @@ img2 = cv2.bitwise_not(img2,img2,mask = img_tt)
 for i in rp:
     cv2.circle(img2, (i[0],i[1]), 1, (255,0,0), -1)
 
-name = 'image2+points'
-cv2.namedWindow(name, cv2.WINDOW_NORMAL)
-cv2.imshow(name,img2)
+cv2.namedWindow('image3', cv2.WINDOW_NORMAL)
+cv2.imshow('image3',img2)
 
 
 

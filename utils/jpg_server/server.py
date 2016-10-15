@@ -39,6 +39,8 @@ try:
         image_stream.seek(0)
         data = np.fromstring(image_stream.getvalue(), dtype=np.uint8)
         image = cv2.imdecode(data,cv2.IMREAD_COLOR)
+        image = cv2.transpose(image)
+        image = cv2.flip(image, 0)
         cv2.imshow('image', image)
         cv2.imwrite(str(i) + '.jpg',image)
         i = i + 1
