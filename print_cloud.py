@@ -10,10 +10,11 @@ import cPickle
 pc = PointCloud()
 
 filename = 'points2d.dat'
-
+filename = 'a5.dat'
 
 #lN = v(0.37+0.87,2.,0.)
-lN = v(2.,2.,0.)
+lN = v(0.37, 0.65, 0.)
+#lN = v(2.,2.,0.)
 print 'lN=', lN
 lN = np.dot(rotation_matrix([0,0,1], math.pi/2.), lN)
 print 'lN=', lN
@@ -28,10 +29,14 @@ with open(filename, 'rb') as input:
     inp = cPickle.load(input)
 
 
+skip = 0
 for i, p2d, colors in inp:
+    skip+=1
+#    if skip % 5 != 0:
+#        continue
 
     cam_laser.rotate(i/2.*2.*math.pi/(2048.*3.))
-    rp = cam_laser.compute_points_3d(p2d)
+    rp = cam_laser.compute_points_3d(p2d)#np.asarray(p2d, dtype=np.float64))
     print i, len(rp), len(colors)
 
     pc.addPoints(rp, colors)

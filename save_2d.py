@@ -21,7 +21,7 @@ for i in range(10000,14500,2):
     rp = line.get_points_2d()
     colors = line.get_colors()
     print i, len(rp), len(colors)
-    retu.append([i,rp, colors])
+    retu.append([i,np.asarray(rp, dtype=np.float32), np.asarray(colors)])
 
 
 with open(filename, 'wb') as output:

@@ -9,7 +9,7 @@ def rotation_matrix(axis, theta):
     Return the rotation matrix associated with counterclockwise rotation about
     the given axis by theta radians.
     """
-    axis = np.asarray(axis)
+    axis = np.asarray(axis, dtype= np.float32)
     axis = axis/math.sqrt(np.dot(axis, axis))
     a = math.cos(theta/2.0)
     b, c, d = -axis*math.sin(theta/2.0)
@@ -17,12 +17,24 @@ def rotation_matrix(axis, theta):
     bc, ad, ac, ab, bd, cd = b*c, a*d, a*c, a*b, b*d, c*d
     return np.array([[aa+bb-cc-dd, 2*(bc+ad), 2*(bd-ac)],
                      [2*(bc-ad), aa+cc-bb-dd, 2*(cd+ab)],
-                     [2*(bd+ac), 2*(cd-ab), aa+dd-bb-cc]])
+                     [2*(bd+ac), 2*(cd-ab), aa+dd-bb-cc]], dtype= np.float32)
+
+def a_matrix(a, b = [0., 0., 0.]):
+    return np.array([[a[0,0], a[0,1], a[0,2], b[0]],
+                     [a[1,0], a[1,1], a[1,2], b[1]],
+                     [a[2,0], a[2,1], a[2,2], b[2]],
+                     [0.,     0.,     0.,     1.]], dtype= np.float32)
+
+def d_matrix(a= [1., 1., 1.], b = [0.,0.,0.]):
+    return np.array([[a[0,0], 0., 0., b[0]],
+                     [0., a[1,1], 0., b[1]],
+                     [0., 0., a[2,2], b[2]],
+                     [0., 0.,     0., 1.]], dtype= np.float32)
 
 def v(x,y,z):
-    return np.asarray([x,y,z])
+    return np.asarray([x,y,z], dtype= np.float32)
 def v2(x,y):
-    return np.asarray([x,y])
+    return np.asarray([x,y], dtype= np.float32)
 
 class CamLaser:
     def __init__(self, cam_O, cam_C, cam_DX, cam_DY, cam_resolution, laser_O, laser_N):
@@ -55,7 +67,7 @@ class CamLaser:
 #        print 'a=', self.a
 
     def get_point_3d(self, point_2d):
-#        point_2d -= self.cam_resolution_2
+        point_2d -= self.cam_resolution_2
         z = self.n_cam_C + point_2d[0]*self.n_cam_DX+point_2d[1]*self.n_cam_DY
         return self.a/np.dot(self.n_laser_N, z)*z + self.n_cam_O
 
