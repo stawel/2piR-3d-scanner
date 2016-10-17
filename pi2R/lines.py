@@ -19,6 +19,10 @@ def rotation_matrix(axis, theta):
                      [2*(bc-ad), aa+cc-bb-dd, 2*(cd+ab)],
                      [2*(bd+ac), 2*(cd-ab), aa+dd-bb-cc]])
 
+def v(x,y,z):
+    return np.asarray([x,y,z])
+def v2(x,y):
+    return np.asarray([x,y])
 
 class CamLaser:
     def __init__(self, cam_O, cam_C, cam_DX, cam_DY, cam_resolution, laser_O, laser_N):
@@ -55,6 +59,13 @@ class CamLaser:
         z = self.n_cam_C + point_2d[0]*self.n_cam_DX+point_2d[1]*self.n_cam_DY
         return self.a/np.dot(self.n_laser_N, z)*z + self.n_cam_O
 
+    def compute_points_3d(self, points_2d):
+        retu = []
+        for i in points_2d:
+            x = self.get_point_3d(i)
+#            print 'x=',x
+            retu.append(x)
+        return retu
 
 class Line:
     def __init__(self, normal_image_name, laser_image_name):
@@ -120,7 +131,7 @@ class Line:
                 cx = x
         return retu
 
-    def get_points_2d(self):
+    def get_points_2d_(self):
         self._do_mask_rgb()
         a = np.argwhere(self.mask)
         if len(a) > 25000:
@@ -141,9 +152,12 @@ class Line:
             return []
         return p
 
+    def get_points_2d(self):
+        self.points_2d = self.get_points_2d_()
+        return self.points_2d
 
     def get_points_3d_flat(self, y = 0):
-        self.points_2d = self.get_points_2d()
+        self.get_points_2d()
         retu = []
         for i in self.points_2d:
             retu.append((i[0],i[1],y))
