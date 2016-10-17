@@ -19,9 +19,9 @@ for i in range(10000,14500,2):
 
     line = Line(path + str(i) + ".jpg", path + str(i+1) + ".jpg")
     rp = line.get_points_2d()
-    colors = line.get_colors()
+    colors = line.get_colors_rgb()
     print i, len(rp), len(colors)
-    retu.append([i,np.asarray(rp, dtype=np.float32), np.asarray(colors)])
+    retu.append([i,np.asarray(rp, dtype=np.float32), np.asarray(colors, dtype=np.uint8)])
 
 
 with open(filename, 'wb') as output:

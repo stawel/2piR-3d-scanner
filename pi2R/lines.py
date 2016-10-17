@@ -71,13 +71,41 @@ class CamLaser:
         z = self.n_cam_C + point_2d[0]*self.n_cam_DX+point_2d[1]*self.n_cam_DY
         return self.a/np.dot(self.n_laser_N, z)*z + self.n_cam_O
 
-    def compute_points_3d(self, points_2d):
+    def compute_points_3d(self, p2d):
+        if len(p2d) > 0:
+            z = np.zeros((p2d.shape[0],p2d.shape[1]+1), dtype=np.float32)
+            p2d -= self.cam_resolution_2
+            p2d_x, p2d_y = p2d[:,0], p2d[:,1]
+            z[:,0] = self.n_cam_DX[0]*p2d_x + self.n_cam_DY[0]*p2d_y + self.n_cam_C[0]
+            z[:,1] = self.n_cam_DX[1]*p2d_x + self.n_cam_DY[1]*p2d_y + self.n_cam_C[1]
+            z[:,2] = self.n_cam_DX[2]*p2d_x + self.n_cam_DY[2]*p2d_y + self.n_cam_C[2]
+            a = self.a/(self.n_laser_N*z).sum(1)
+            aa = np.zeros((p2d.shape[0],p2d.shape[1]+1), dtype=np.float32)
+            aa[:,0] = a
+            aa[:,1] = a
+            aa[:,2] = a
+            b = aa*z
+            return b
+            print 'N=',self.n_laser_N
+            print 'C=', self.n_cam_C
+            print 'DX=', self.n_cam_DX
+            print 'DY=', self.n_cam_DY
+
+            print 'z=',z
+            print 'a=',a
+            print 'aa=',aa
+            print 'b=',b
+            print '!!!!!!!!!!!'
+            sdasd+=1
+        return []
+
+    def compute_points_3d_(self, points_2d):
         retu = []
         for i in points_2d:
             x = self.get_point_3d(i)
 #            print 'x=',x
             retu.append(x)
-        return retu
+        return np.asarray(retu)
 
 class Line:
     def __init__(self, normal_image_name, laser_image_name):
@@ -186,3 +214,6 @@ class Line:
 
     def get_colors(self):
         return [self.n_img[x,y] for y,x in self.points_2d]
+
+    def get_colors_rgb(self):
+        return [ [r,g,b] for b,g,r in [self.n_img[x,y] for y,x in self.points_2d]]

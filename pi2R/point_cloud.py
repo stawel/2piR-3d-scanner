@@ -1,59 +1,36 @@
 #!/usr/bin/python
 import vtk
-from numpy import random
+from vtk_visualizer.pointobject import *
+
 
 class PointCloud:
 
-    def __init__(self, zMin=-100.0, zMax=100.0, maxNumPoints=1e6):
-        self.maxNumPoints = maxNumPoints
-        self.vtkPolyData = vtk.vtkPolyData()
-        self.clearPoints()
-        mapper = vtk.vtkPolyDataMapper()
-        mapper.SetInputData(self.vtkPolyData)
-#        mapper.SetColorModeToDefault()
-#        mapper.SetScalarRange(zMin, zMax)
-#        mapper.SetScalarVisibility(1)
-        self.vtkActor = vtk.vtkActor()
-        self.vtkActor.SetMapper(mapper)
+    def __init__(self):
+        self.renderer = vtk.vtkRenderer()
+        self.pointObjects = []
+        self.p = []
+        self.c = []
+    def addPoints(self, points, colors):
+        if len(points) > 0:
+            self.p.append(points)
+            self.c.append(colors)
 
-    def addPoints(self, points, colors = []):
-        for i in range(0,len(points)):
-            if(len(colors) <= i):
-                color = [255,255,0]
-            else:
-                color = colors[i]
-            self.addPoint(points[i], color)
-
-
-    def addPoint(self, point, color = [255, 0, 0]):
-        pointId = self.vtkPoints.InsertNextPoint(point[:])
-        self.Colors.InsertNextTuple3(color[2], color[1], color[0])
-#        self.vtkDepth.InsertNextValue(-point[2])
-        self.vtkCells.InsertNextCell(1)
-        self.vtkCells.InsertCellPoint(pointId)
-        self.vtkCells.Modified()
-        self.vtkPoints.Modified()
-#        self.vtkDepth.Modified()
-
-    def clearPoints(self):
-        self.vtkPoints = vtk.vtkPoints()
-        self.vtkCells = vtk.vtkCellArray()
-        self.Colors = vtk.vtkUnsignedCharArray()
-        self.Colors.SetNumberOfComponents(3)
-        self.Colors.SetName('Colors')
-        self.vtkPolyData.SetPoints(self.vtkPoints)
-        self.vtkPolyData.SetVerts(self.vtkCells)
-        self.vtkPolyData.GetPointData().SetScalars(self.Colors)
-#        self.vtkPolyData.GetPointData().SetActiveScalars('DepthArray')
-
+    def addPointsAktor(self, points, colors):
+        if len(points) > 0:
+            obj = VTKObject()
+            obj.CreateFromArray(points)
+            obj.AddColors(colors.astype(np.uint8))
+            self.pointObjects.append(obj)
+            self.renderer.AddActor(obj.GetActor())
 
 def run(pointCloud):
 # Renderer
-    renderer = vtk.vtkRenderer()
-    renderer.AddActor(pointCloud.vtkActor)
+    renderer = pointCloud.renderer
+#    renderer.AddActor(pointCloud.vtkActor)
     renderer.SetBackground(.2, .3, .4)
     renderer.ResetCamera()
 
+    pointCloud.addPointsAktor(np.concatenate(pointCloud.p),np.concatenate(pointCloud.c))
 # Render Window
     renderWindow = vtk.vtkRenderWindow()
     renderWindow.AddRenderer(renderer)
