@@ -19,17 +19,6 @@ def rotation_matrix(axis, theta):
                      [2*(bc-ad), aa+cc-bb-dd, 2*(cd+ab)],
                      [2*(bd+ac), 2*(cd-ab), aa+dd-bb-cc]], dtype= np.float32)
 
-def a_matrix(a, b = [0., 0., 0.]):
-    return np.array([[a[0,0], a[0,1], a[0,2], b[0]],
-                     [a[1,0], a[1,1], a[1,2], b[1]],
-                     [a[2,0], a[2,1], a[2,2], b[2]],
-                     [0.,     0.,     0.,     1.]], dtype= np.float32)
-
-def d_matrix(a= [1., 1., 1.], b = [0.,0.,0.]):
-    return np.array([[a[0,0], 0., 0., b[0]],
-                     [0., a[1,1], 0., b[1]],
-                     [0., 0., a[2,2], b[2]],
-                     [0., 0.,     0., 1.]], dtype= np.float32)
 
 def v(x,y,z):
     return np.asarray([x,y,z], dtype= np.float32)
@@ -47,11 +36,19 @@ class CamLaser:
         self.laser_N = laser_N # lasers plane normal vector
         self.compute_laser_D() # lasers plane D parameter (Ax + By + Cz + D = 0 or N*X + D = 0)
 
+    def rotateCam(self, angle):
+        m = rotation_matrix(v(0.,0.,1.), angle)
+        self.cam_O = np.dot(m, self.cam_O)
+        self.cam_C = np.dot(m, self.cam_C)  # camer view direction
+        self.cam_DX = np.dot(m, self.cam_DX)
+        self.cam_DY = np.dot(m, self.cam_DY)
+
+
     def compute_laser_D(self):
         self.laser_D = -np.dot(self.laser_N, self.laser_O)
 
     def rotate(self, angle):
-        m = rotation_matrix([0,0,1], angle)
+        m = rotation_matrix(v(0.,0.,1.), angle)
         self.n_cam_O = np.dot(m, self.cam_O)
         self.n_cam_C = np.dot(m, self.cam_C)  # camer view direction
         self.n_cam_DX = np.dot(m, self.cam_DX)
@@ -84,7 +81,7 @@ class CamLaser:
             aa[:,0] = a
             aa[:,1] = a
             aa[:,2] = a
-            b = aa*z
+            b = aa*z + self.n_cam_O
             return b
             print 'N=',self.n_laser_N
             print 'C=', self.n_cam_C
