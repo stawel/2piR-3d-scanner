@@ -2,6 +2,58 @@
 
 import numpy as np
 import cv2
+import math
+
+def rotation_matrix(axis, theta):
+    """
+    Return the rotation matrix associated with counterclockwise rotation about
+    the given axis by theta radians.
+    """
+    axis = np.asarray(axis)
+    axis = axis/math.sqrt(np.dot(axis, axis))
+    a = math.cos(theta/2.0)
+    b, c, d = -axis*math.sin(theta/2.0)
+    aa, bb, cc, dd = a*a, b*b, c*c, d*d
+    bc, ad, ac, ab, bd, cd = b*c, a*d, a*c, a*b, b*d, c*d
+    return np.array([[aa+bb-cc-dd, 2*(bc+ad), 2*(bd-ac)],
+                     [2*(bc-ad), aa+cc-bb-dd, 2*(cd+ab)],
+                     [2*(bd+ac), 2*(cd-ab), aa+dd-bb-cc]])
+
+
+class CamLaser:
+    def __init__(self, cam_O, cam_C, cam_DX, cam_DY, cam_resolution, laser_O, laser_N):
+        self.cam_O = cam_O  # camer position
+        self.cam_C = cam_C  # camer view direction
+        self.cam_DX = cam_DX
+        self.cam_DY = cam_DY
+        self.cam_resolution_2 = cam_resolution/2
+        self.laser_O = laser_O # laser position
+        self.laser_N = laser_N # lasers plane normal vector
+        self.compute_laser_D() # lasers plane D parameter (Ax + By + Cz + D = 0 or N*X + D = 0)
+
+    def compute_laser_D(self):
+        self.laser_D = -np.dot(self.laser_N, self.laser_O)
+
+    def rotate(self, angle):
+        m = rotation_matrix([0,0,1], angle)
+        self.n_cam_O = np.dot(m, self.cam_O)
+        self.n_cam_C = np.dot(m, self.cam_C)  # camer view direction
+        self.n_cam_DX = np.dot(m, self.cam_DX)
+        self.n_cam_DY = np.dot(m, self.cam_DY)
+        self.n_laser_O = np.dot(m, self.laser_O) # laser position
+        self.n_laser_N = np.dot(m, self.laser_N) # lasers plane normal vector
+        self.compute_laser_D()
+        self.calc_()
+
+    def calc_(self):
+#        print 'D=', self.laser_D
+        self.a = -self.laser_D-np.dot(self.n_laser_N, self.n_cam_O)
+#        print 'a=', self.a
+
+    def get_point_3d(self, point_2d):
+#        point_2d -= self.cam_resolution_2
+        z = self.n_cam_C + point_2d[0]*self.n_cam_DX+point_2d[1]*self.n_cam_DY
+        return self.a/np.dot(self.n_laser_N, z)*z + self.n_cam_O
 
 
 class Line:
@@ -90,11 +142,20 @@ class Line:
         return p
 
 
-    def get_points_3d(self, y = 0):
+    def get_points_3d_flat(self, y = 0):
         self.points_2d = self.get_points_2d()
         retu = []
         for i in self.points_2d:
             retu.append((i[0],i[1],y))
+        return retu
+
+    def get_points_3d(self, cam_laser):
+        self.points_2d = self.get_points_2d()
+        retu = []
+        for i in self.points_2d:
+            x = cam_laser.get_point_3d(i)
+#            print 'x=',x
+            retu.append(x)
         return retu
 
     def get_colors(self):
