@@ -3,8 +3,8 @@
 import numpy as np
 import cv2
 
-name1 = '10622.jpg'
-name2 = '10623.jpg'
+name1 = '10650.jpg'
+name2 = '10651.jpg'
 def nothing(x):
     pass
 
@@ -49,16 +49,16 @@ def add_window(a,b,name ,blur,  tr):
     cv2.imshow(name ,img)
 
 
-add_window(g2,g1,'g: cv2.THRESH_BINARY+cv2.THRESH_OTSU',False, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-add_window(r2,r1,'r: cv2.THRESH_BINARY+cv2.THRESH_OTSU',False, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-add_window(b2,b1,'b: cv2.THRESH_BINARY+cv2.THRESH_OTSU',False, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+add_window(g2,g1,'g: cv2.THRESH_BINARY',True, cv2.THRESH_BINARY)
+add_window(r2,r1,'r: cv2.THRESH_BINARY',True, cv2.THRESH_BINARY)
+add_window(b2,b1,'b: cv2.THRESH_BINARY',True, cv2.THRESH_BINARY)
 
-rgb2 = b2>>2
-rgb2 +=r2>>2
-rgb2 +=g2>>2
-rgb1 = b1>>2
-rgb1 +=r1>>2
-rgb1 +=g1>>2
+rgb2 = b2>>1
+rgb2 +=r2>>1
+#rgb2 +=g2>>2
+rgb1 = b1>>1
+rgb1 +=r1>>1
+#rgb1 +=g1>>2
 
 
 add_window(rgb2,rgb1,'rgb: cv2.THRESH_BINARY',False, cv2.THRESH_BINARY) #cv2.THRESH_TOZERO)

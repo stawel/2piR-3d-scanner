@@ -8,14 +8,14 @@ import math
 import cPickle
 
 
-path = "./s2/"
+path = "./s4/"
 
 filename = 'points2d.dat'
 
 retu = []
 
 
-for i in range(10000,14500,2):
+for i in range(10000,13100,2):
 
     line = Line(path + str(i) + ".jpg", path + str(i+1) + ".jpg")
     rp = line.get_points_2d()

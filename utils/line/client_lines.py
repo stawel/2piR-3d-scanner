@@ -2,11 +2,15 @@
 
 import numpy as np
 import cv2
+import sys
+
+sys.path.append('../..')
+
 from pi2R.lines import *
 from pi2R.point_cloud import *
 
-name1 = '10000.jpg'
-name2 = '10001.jpg'
+name1 = '10650.jpg'
+name2 = '10651.jpg'
 
 
 line = Line(name1, name2)

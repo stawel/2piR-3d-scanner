@@ -11,6 +11,8 @@ pc = PointCloud()
 
 filename = 'points2d.dat'
 filename = 'a6.dat'
+filename = 'b2.dat'
+
 
 
 
@@ -32,7 +34,7 @@ def set_points(x = 0):
     skip = 0
     for i, p2d, colors in inp:
         skip+=1
-        if skip % 2 != 0:
+        if skip % 1 != 0:
             continue
 
         alfa = (i-10000)/2.*2.*math.pi/(2048.*3.)
@@ -49,5 +51,5 @@ def callback(obj, event):
     pc.addActors()
 
 set_points()
-pc.addSlider(callback)
+#pc.addSlider(callback)
 pc.run()

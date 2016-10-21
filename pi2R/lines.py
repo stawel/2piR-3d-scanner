@@ -107,7 +107,10 @@ class CamLaser:
 class Line:
     def __init__(self, normal_image_name, laser_image_name):
         self.n_img = cv2.imread(normal_image_name, cv2.IMREAD_COLOR)
+        self.n_img = cv2.GaussianBlur(self.n_img,(5,5),0)
+
         self.l_img = cv2.imread(laser_image_name, cv2.IMREAD_COLOR)
+        self.l_img = cv2.GaussianBlur(self.l_img,(5,5),0)
 
     def _do_signal_rgb(self):
         """rgb"""
@@ -169,10 +172,11 @@ class Line:
         return retu
 
     def get_points_2d_(self):
-        self._do_mask_rgb()
-        a = np.argwhere(self.mask)
-        if len(a) > 25000:
-            print 'error rgb:', len(a)
+#        self._do_mask_rgb()
+#        a = np.argwhere(self.mask)
+#        if len(a) > 25000:
+#            print 'error rgb:', len(a)
+        if True:
             r = self._do_mask_r()
             a = np.argwhere(self.mask)
             if len(a) > 25000:
