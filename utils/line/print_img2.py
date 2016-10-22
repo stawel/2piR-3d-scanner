@@ -3,8 +3,8 @@
 import numpy as np
 import cv2
 
-name1 = '10650.jpg'
-name2 = '10651.jpg'
+name1 = '10334.jpg'
+name2 = '10335.jpg'
 def nothing(x):
     pass
 

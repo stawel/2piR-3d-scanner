@@ -5,8 +5,6 @@ import cv2
 
 name1 = '10334.jpg'
 name2 = '10335.jpg'
-
-
 def nothing(x):
     pass
 
@@ -17,6 +15,7 @@ def rotate(img):
 # Load an color image in grayscale
 img1 = cv2.imread(name1,cv2.IMREAD_COLOR)
 img1 = rotate(img1)
+img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2HSV)
 
 cv2.namedWindow('image', cv2.WINDOW_NORMAL)
 cv2.createTrackbar('T','image',0,255,nothing)
@@ -25,6 +24,7 @@ cv2.imshow('image',img1)
 
 img2 = cv2.imread(name2,cv2.IMREAD_COLOR)
 img2 = rotate(img2)
+img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2HSV)
 
 cv2.namedWindow('image2', cv2.WINDOW_NORMAL)
 cv2.createTrackbar('T','image2',0,255,nothing)
@@ -37,7 +37,7 @@ b2,g2,r2 = cv2.split(img2)
 
 def add_window(a,b,name ,blur,  tr):
     cv2.namedWindow(name, cv2.WINDOW_NORMAL)
-    img = cv2.absdiff(a,b)
+    img = a #cv2.absdiff(a,b)
 
     def d(t):
         if blur:
@@ -51,16 +51,16 @@ def add_window(a,b,name ,blur,  tr):
     cv2.imshow(name ,img)
 
 
-add_window(g2,g1,'g: cv2.THRESH_BINARY+cv2.THRESH_OTSU',False, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-add_window(r2,r1,'r: cv2.THRESH_BINARY+cv2.THRESH_OTSU',False, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-add_window(b2,b1,'b: cv2.THRESH_BINARY+cv2.THRESH_OTSU',False, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+add_window(g2,g1,'g: cv2.THRESH_BINARY',True, cv2.THRESH_BINARY)
+add_window(r2,r1,'r: cv2.THRESH_BINARY',True, cv2.THRESH_BINARY)
+add_window(b2,b1,'b: cv2.THRESH_BINARY',True, cv2.THRESH_BINARY)
 
-rgb2 = b2>>2
-rgb2 +=r2>>2
-rgb2 +=g2>>2
-rgb1 = b1>>2
-rgb1 +=r1>>2
-rgb1 +=g1>>2
+rgb2 = b2>>1
+rgb2 +=r2>>1
+#rgb2 +=g2>>2
+rgb1 = b1>>1
+rgb1 +=r1>>1
+#rgb1 +=g1>>2
 
 
 add_window(rgb2,rgb1,'rgb: cv2.THRESH_BINARY',False, cv2.THRESH_BINARY) #cv2.THRESH_TOZERO)
