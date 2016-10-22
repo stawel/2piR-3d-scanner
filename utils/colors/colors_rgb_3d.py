@@ -7,8 +7,10 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import hsv_to_rgb
 import cv2
 
-name1 = '10334.jpg'
-name2 = '10335.jpg'
+
+file_nr = 10032
+name1 = str(file_nr) + '.jpg'
+name2 = str(file_nr+1) + '.jpg'
 
 N = 30
 

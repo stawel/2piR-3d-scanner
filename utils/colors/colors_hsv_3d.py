@@ -7,8 +7,10 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import hsv_to_rgb
 import cv2
 
-name1 = '10334.jpg'
-name2 = '10335.jpg'
+file_nr = 10032
+name1 = str(file_nr) + '.jpg'
+name2 = str(file_nr+1) + '.jpg'
+
 
 N = 30
 
@@ -25,7 +27,7 @@ fig = plt.figure()
 
 ax = fig.add_subplot(1,2,1)
 imgplot = plt.imshow(hsv_to_rgb(img2_hsv))
-scatter = plt.scatter(50, 50, marker='s', s = N, alpha = 0.1)
+scatter = plt.scatter(50, 50, marker='s', s = 2*N, alpha = 0.1)
 (y,x,z) = img2_hsv.shape
 plt.axis([0., x, y, 0.])
 
@@ -43,13 +45,13 @@ def onclick(event):
     if ax == event.inaxes:
         x = int(event.xdata)
         y = int(event.ydata)
-        n_hsv1 = img1_hsv[y:y+N,x:x+N].reshape(N*N,3)
-        n_hsv2 = img2_hsv[y:y+N,x:x+N].reshape(N*N,3)
+        n_hsv1 = img1_hsv[y-N:y+N,x-N:x+N].reshape(4*N*N,3)
+        n_hsv2 = img2_hsv[y-N:y+N,x-N:x+N].reshape(4*N*N,3)
         hsv_b.set_data(n_hsv1[:,0], n_hsv1[:,1])
         hsv_b.set_3d_properties(n_hsv1[:,2])
         hsv_r.set_data(n_hsv2[:,0], n_hsv2[:,1])
         hsv_r.set_3d_properties(n_hsv2[:,2])
-        scatter.set_offsets(np.array([x+N/2,y+N/2]))
+        scatter.set_offsets(np.array([x,y]))
 #        scatter.y = y
 
         fig.canvas.draw()
