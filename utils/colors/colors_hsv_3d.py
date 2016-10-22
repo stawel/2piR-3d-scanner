@@ -6,13 +6,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import hsv_to_rgb
 import cv2
+from matplotlib.patches import Rectangle
+from matplotlib.collections import PatchCollection
+import matplotlib
+
 
 file_nr = 10032
 name1 = str(file_nr) + '.jpg'
 name2 = str(file_nr+1) + '.jpg'
 
 
-N = 30
+N = 15
 
 
 # Load an color image in grayscale
@@ -26,8 +30,10 @@ img2_hsv = cv2.cvtColor(img2, cv2.COLOR_BGR2HSV).astype(np.float32)/[180.,255.,2
 fig = plt.figure()
 
 ax = fig.add_subplot(1,2,1)
-imgplot = plt.imshow(hsv_to_rgb(img2_hsv))
-scatter = plt.scatter(50, 50, marker='s', s = 2*N, alpha = 0.1)
+imgplot = ax.imshow(hsv_to_rgb(img2_hsv))
+
+rectangle = ax.add_patch(Rectangle((0, 0),2*N,2*N,alpha=0.2))
+
 (y,x,z) = img2_hsv.shape
 plt.axis([0., x, y, 0.])
 
@@ -42,7 +48,7 @@ ax3d.set_zlabel('V')
 
 
 def onclick(event):
-    if ax == event.inaxes:
+    if ax == event.inaxes and event.button == 1:
         x = int(event.xdata)
         y = int(event.ydata)
         n_hsv1 = img1_hsv[y-N:y+N,x-N:x+N].reshape(4*N*N,3)
@@ -51,8 +57,7 @@ def onclick(event):
         hsv_b.set_3d_properties(n_hsv1[:,2])
         hsv_r.set_data(n_hsv2[:,0], n_hsv2[:,1])
         hsv_r.set_3d_properties(n_hsv2[:,2])
-        scatter.set_offsets(np.array([x,y]))
-#        scatter.y = y
+        rectangle.set_xy(np.array([x-N,y-N]))
 
         fig.canvas.draw()
     

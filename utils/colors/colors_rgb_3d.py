@@ -5,6 +5,7 @@ import numpy as np
 #import pylab as plt
 import matplotlib.pyplot as plt
 from matplotlib.colors import hsv_to_rgb
+from matplotlib.patches import Rectangle
 import cv2
 
 
@@ -12,7 +13,7 @@ file_nr = 10032
 name1 = str(file_nr) + '.jpg'
 name2 = str(file_nr+1) + '.jpg'
 
-N = 30
+N = 15
 
 
 # Load an color image in grayscale
@@ -27,7 +28,7 @@ fig = plt.figure()
 
 ax = fig.add_subplot(1,2,1)
 imgplot = plt.imshow(hsv_to_rgb(img2_hsv))
-scatter = plt.scatter(50, 50, marker='s', s = N, alpha = 0.1)
+rectangle = ax.add_patch(Rectangle((0, 0),2*N,2*N,alpha=0.2))
 (y,x,z) = img2_hsv.shape
 plt.axis([0., x, y, 0.])
 
@@ -42,17 +43,16 @@ ax3d.set_zlabel('B')
 
 
 def onclick(event):
-    if ax == event.inaxes:
+    if ax == event.inaxes and event.button == 1:
         x = int(event.xdata)
         y = int(event.ydata)
-        n_bgr1 = img1[y:y+N,x:x+N].reshape(N*N,3)/255.
-        n_bgr2 = img2[y:y+N,x:x+N].reshape(N*N,3)/255.
+        n_bgr1 = img1[y-N:y+N,x-N:x+N].reshape(4*N*N,3)/255.
+        n_bgr2 = img2[y-N:y+N,x-N:x+N].reshape(4*N*N,3)/255.
         rgb_b.set_data(n_bgr1[:,2], n_bgr1[:,1])
         rgb_b.set_3d_properties(n_bgr1[:,0])
         rgb_r.set_data(n_bgr2[:,2], n_bgr2[:,1])
         rgb_r.set_3d_properties(n_bgr2[:,0])
-        scatter.set_offsets(np.array([x+N/2,y+N/2]))
-#        scatter.y = y
+        rectangle.set_xy(np.array([x-N,y-N]))
 
         fig.canvas.draw()
     
