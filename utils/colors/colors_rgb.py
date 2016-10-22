@@ -52,8 +52,8 @@ def onclick(event):
     if ax == event.inaxes:
         x = int(event.xdata)
         y = int(event.ydata)
-        n_hsv1 = img1_hsv[y:y+N,x:x+N].reshape(N*N,3)
-        n_hsv2 = img2_hsv[y:y+N,x:x+N].reshape(N*N,3)
+        n_hsv1 = img1[y:y+N,x:x+N].reshape(N*N,3)/255.
+        n_hsv2 = img2[y:y+N,x:x+N].reshape(N*N,3)/255.
         hv_b.set_data(n_hsv1[:,0], n_hsv1[:,2])
         hs_b.set_data(n_hsv1[:,1], n_hsv1[:,2])
         hv_r.set_data(n_hsv2[:,0], n_hsv2[:,2])
