@@ -52,6 +52,7 @@ def transform(img1, img2):
     y = (v2-v1)**2 + (s2-s1)**2+(h2-h1)**2
 
     mask_brighter = v2 > v1+0.07
+    mask_brighter = np.logical_and(y > 0.01,mask_brighter)
 
 #    mask_b = bright_mask(h1,s1,v1, h2,s2,v2)
 #    mask_red = red_mask(h1,s1,v1, h2,s2,v2)
