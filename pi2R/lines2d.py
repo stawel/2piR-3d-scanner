@@ -22,7 +22,7 @@ def bright_mask(h1,s1,v1,h2,s2,v2):
 def max_laser(y, d, not_mask):
     start = timer()
     y[not_mask] = d
-    y = gaussian_filter1d(y, sigma=2, axis=1)
+#    y = gaussian_filter1d(y, sigma=2, axis=1)
 #    y = gaussian_filter(y, sigma=2)
 #    y[not_mask] = d
     retu = argrelmax(y, axis=1)
