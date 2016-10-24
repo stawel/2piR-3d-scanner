@@ -108,10 +108,9 @@ class CamLaser:
 class Line:
     def __init__(self, normal_image_name, laser_image_name):
         self.n_img = cv2.imread(normal_image_name, cv2.IMREAD_COLOR)
-        self.n_img = cv2.GaussianBlur(self.n_img,(15,5),0)
-
+        #self.n_img = cv2.GaussianBlur(self.n_img,(15,5),0)
         self.l_img = cv2.imread(laser_image_name, cv2.IMREAD_COLOR)
-        self.l_img = cv2.GaussianBlur(self.l_img,(15,5),0)
+        #self.l_img = cv2.GaussianBlur(self.l_img,(15,5),0)
 
 
     def get_points_2d_(self):

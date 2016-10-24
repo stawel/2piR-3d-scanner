@@ -21,69 +21,69 @@ name2 = path + str(file_nr+1) + '.jpg'
 N = 5
 
 
-def transform(img1, img2):
-    res = img2.copy()
+def transform(disp_img, img1, img2):
+    res = disp_img
     mask, (x,y) = pi2R.lines2d.transform(img1, img2)
+
     res[mask] = [0.,0.,0.]
-#    print x,y
-    res[x,y] = [0.5,1.,1.]
-#    res[x+1,y] = [0.5,1.,1.]
-    res[x-1,y] = [0.5,1.,1.]
-    res[x,y+1] = [0.5,1.,1.]
-    res[x,y-1] = [0.5,1.,1.]
+    color = [0,255,255]
+    res[x,y] = color
+#    res[x+1,y] = color
+    res[x-1,y] = color
+    res[x,y+1] = color
+    res[x,y-1] = color
 
     return res, (x,y)
 
 
 # Load an color image in grayscale
 img1 = cv2.imread(name1,cv2.IMREAD_COLOR)
-img1 = cv2.GaussianBlur(img1,(15,5),0)
-
-img1_hsv_dis = cv2.cvtColor(img1, cv2.COLOR_BGR2HSV);
-img1_hsv = img1_hsv_dis.astype(np.float32)/[180.,255.,255.]
+#img1 = cv2.GaussianBlur(img1,(15,5),0)
+img1_hls = cv2.cvtColor(img1, cv2.COLOR_BGR2HLS);
+img1_hls = img1_hls.astype(np.float32)/[180.,255.,255.]
 
 img2 = cv2.imread(name2,cv2.IMREAD_COLOR)
-img2 = cv2.GaussianBlur(img2,(15,5),0)
+#img2 = cv2.GaussianBlur(img2,(15,5),0)
+img2_hls = cv2.cvtColor(img2, cv2.COLOR_BGR2HLS)
+img2_hls = img2_hls.astype(np.float32)/[180.,255.,255.]
 
-img2_hsv = cv2.cvtColor(img2, cv2.COLOR_BGR2HSV)
+disp_img = img2[:,:,[2,1,0]]
 
-img2_hsv_dis = img2_hsv
-img2_hsv = img2_hsv.astype(np.float32)/[180.,255.,255.]
-
-img2_hsv_dis, xy = transform(img1_hsv, img2_hsv)
-#img2_hsv_dis = img2_hsv_dis.astype(np.float32)/[180.,255.,255.]
+disp_img, xy = transform(disp_img, img1_hls, img2_hls)
 
 
 fig = plt.figure()
 
 ax = fig.add_subplot(1,2,1)
-imgplot = ax.imshow(hsv_to_rgb(img2_hsv_dis))
+
+#imgplot = ax.imshow(disp_img)
+imgplot = ax.imshow(pi2R.lines2d.y_data)
 
 rectangle = ax.add_patch(Rectangle((0, 0),2*N,2*N,alpha=0.2))
 
-(y,x,z) = img2_hsv.shape
+(y,x,z) = img2.shape
 plt.axis([0., x, y, 0.])
 
 ax3d = fig.add_subplot(1,2,2, projection='3d')
 
 msize = 1
-hsv_r, = ax3d.plot([], [], 'r.', markersize=msize)
-hsv_b, = ax3d.plot([], [], 'b.', markersize=msize)
+hls_r, = ax3d.plot([], [], 'r.', markersize=msize)
+hls_b, = ax3d.plot([], [], 'b.', markersize=msize)
 ax3d.set_xlabel('H')
-ax3d.set_ylabel('S')
-ax3d.set_zlabel('V')
+ax3d.set_ylabel('L')
+ax3d.set_zlabel('S')
 
 r_x, r_y = 0, 0
 def set_rectangle_xy(x,y, N):
     global r_x, r_y
     x, y = int(x), int(y)
     r_x, r_y = x, y
-    n_hsv1 = img1_hsv[y-N:y+N,x-N:x+N].reshape(4*N*N,3)
-    n_hsv2 = img2_hsv[y-N:y+N,x-N:x+N].reshape(4*N*N,3)
-    hsv_b.set_data(n_hsv1[:,0], n_hsv1[:,1])
-    hsv_b.set_3d_properties(n_hsv1[:,2])
-    hsv_r.set_data(n_hsv2[:,0], n_hsv2[:,1])
-    hsv_r.set_3d_properties(n_hsv2[:,2])
+    n_hls1 = img1_hls[y-N:y+N,x-N:x+N].reshape(4*N*N,3)
+    n_hls2 = img2_hls[y-N:y+N,x-N:x+N].reshape(4*N*N,3)
+    hls_b.set_data(n_hls1[:,0], n_hls1[:,1])
+    hls_b.set_3d_properties(n_hls1[:,2])
+    hls_r.set_data(n_hls2[:,0], n_hls2[:,1])
+    hls_r.set_3d_properties(n_hls2[:,2])
     rectangle.set_width(2*N)
     rectangle.set_height(2*N)
     rectangle.set_xy(np.array([x-N,y-N]))

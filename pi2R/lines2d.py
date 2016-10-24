@@ -4,6 +4,7 @@
 import numpy as np
 import cv2
 import math
+import scipy.ndimage as ndimage
 
 from scipy.signal import argrelmax, argrelmin
 from scipy.ndimage.filters import gaussian_filter,gaussian_filter1d
@@ -18,12 +19,12 @@ def bright_mask(h1,s1,v1,h2,s2,v2):
     mask_satur = s2+0.05 < s1
     return np.logical_and(np.logical_and(mask_bright1, mask_bright2),mask_satur)
 
-def max_laser(y, h1,v1,s1,h2,v2,s2, not_mask):
+def max_laser(y, d, not_mask):
     start = timer()
-    y[not_mask] = -1.
-#    y = gaussian_filter1d(y, sigma=2, axis=1)
-    y = gaussian_filter(y, sigma=2)
-    y[not_mask] = -1.
+    y[not_mask] = d
+    y = gaussian_filter1d(y, sigma=2, axis=1)
+#    y = gaussian_filter(y, sigma=2)
+#    y[not_mask] = d
     retu = argrelmax(y, axis=1)
     end = timer()
     print 'max_laser time:',end - start
@@ -37,31 +38,34 @@ def red_mask(h1,s1,v1,h2,s2,v2):
     mask_red2 = -d > h2
     return np.logical_or(mask_red1, mask_red2)
 
-def wrap_red(h):
-    h[h>0.5]-=1.
-    return h
-
 def split(img):
-    return wrap_red(img[:,:,0]),img[:,:,1],img[:,:,2]
+    return img[:,:,0],img[:,:,1],img[:,:,2]
 
+y_data = []
 def transform(img1, img2):
+    global y_data
     start = timer()
-    h1,s1,v1 = split(img1)
-    h2,s2,v2 = split(img2)
+    h1,l1,s1 = split(img1)
+    h2,l2,s2 = split(img2)
 
-    y = (v2-v1)**2 + (s2-s1)**2+(h2-h1)**2
+#    l1 = ndimage.gaussian_filter1d(l1, 3, axis=1)
+#    l2 = ndimage.gaussian_filter1d(l2, 3, axis=1)
+#    l1 = ndimage.gaussian_filter1d(l1, 3, axis=0)
+#    l2 = ndimage.gaussian_filter1d(l2, 3, axis=0)
+#    s1 = ndimage.gaussian_filter1d(l1, 3, axis=1)
+#    s2 = ndimage.gaussian_filter1d(l2, 3, axis=1)
+    y_data = l2-l1#+(s2-s1)*0.3
+#    w = l2 > 0.4
+#    y_data[w] += (s2-s1)[w]
+    d = 0.00
+#    mask_brighter = np.logical_and(y > d, l2 > 0.15)
+    mask_brighter = y_data > d
+    (sy,sx,sz) = img2.shape
+    mask_brighter[sy-10:sy,:] = False
 
-    mask_brighter = v2 > v1+0.07
-    mask_brighter = np.logical_and(y > 0.01,mask_brighter)
-
-#    mask_b = bright_mask(h1,s1,v1, h2,s2,v2)
-#    mask_red = red_mask(h1,s1,v1, h2,s2,v2)
-
-#    mask = np.logical_and(np.logical_or(mask_b,mask_brighter), mask_red)
-#    mask_not = np.logical_not(mask)
     mask_not = np.logical_not(mask_brighter)
 
-    x,y = max_laser(y, h1,v1,s1,h2, v2, s2, mask_not)
+    x,y = max_laser(y_data, d, mask_not)
 
     end = timer()
     print 'transform time:',end - start
@@ -70,10 +74,10 @@ def transform(img1, img2):
 
 def get_points_2d_g(img1, img2):
     start = timer()
-    img1_hsv = cv2.cvtColor(img1, cv2.COLOR_BGR2HSV);
+    img1_hsv = cv2.cvtColor(img1, cv2.COLOR_BGR2HLS);
     img1_hsv = img1_hsv.astype(np.float32)/[180.,255.,255.]
 
-    img2_hsv = cv2.cvtColor(img2, cv2.COLOR_BGR2HSV)
+    img2_hsv = cv2.cvtColor(img2, cv2.COLOR_BGR2HLS)
     img2_hsv = img2_hsv.astype(np.float32)/[180.,255.,255.]
     image, (x,y) = transform(img1_hsv, img2_hsv)
     end = timer()
