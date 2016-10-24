@@ -104,94 +104,103 @@ class CamLaser:
             retu.append(x)
         return np.asarray(retu)
 
+
+from scipy.signal import argrelmax, argrelmin
+from scipy.ndimage.filters import gaussian_filter,gaussian_filter1d
+from timeit import default_timer as timer
+
+
+def bright_mask(h1,s1,v1,h2,s2,v2):
+    # bright objects
+    mask_bright1 = 0.9 < v1
+    mask_bright2 = 0.9 < v2
+
+    mask_satur = s2+0.05 < s1
+    return np.logical_and(np.logical_and(mask_bright1, mask_bright2),mask_satur)
+
+def max_laser(h1,v1,s1,h2,v2,s2, not_mask):
+    start = timer()
+    y = (v2-v1)**2 + (s2-s1)**2+(h2-h1)**2
+    y[not_mask] = -1.
+#    y = gaussian_filter1d(y, sigma=2, axis=1)
+    y = gaussian_filter(y, sigma=2)
+    y[not_mask] = -1.
+    retu = argrelmax(y, axis=1)
+    end = timer()
+    print 'max_laser time:',end - start
+
+    return retu
+
+def red_mask(h1,s1,v1,h2,s2,v2):
+    # bright objects
+    d = 0.1
+    mask_red1 = h2 < 2*d
+    mask_red2 = -d > h2
+    return np.logical_or(mask_red1, mask_red2)
+
+def wrap_red(h):
+    h[h>0.5]-=1.
+    return h
+
+def split(img):
+    return wrap_red(img[:,:,0]),img[:,:,1],img[:,:,2]
+
+def transform(img1, img2):
+    start = timer()
+    h1,s1,v1 = split(img1)
+    h2,s2,v2 = split(img2)
+
+    res = []
+
+    mask_brighter = v2 > v1+0.07
+
+    mask_b = bright_mask(h1,s1,v1, h2,s2,v2)
+    mask_red = red_mask(h1,s1,v1, h2,s2,v2)
+
+    mask = np.logical_and(np.logical_or(mask_b,mask_brighter), mask_red)
+    mask_not = np.logical_not(mask)
+
+
+    x,y = max_laser(h1,v1,s1,h2, v2, s2, mask_not)
+
+    end = timer()
+    print 'transform time:',end - start
+
+    return res, (x,y)
+
+def get_points_2d_g(img1, img2):
+    start = timer()
+    img1_hsv = cv2.cvtColor(img1, cv2.COLOR_BGR2HSV);
+    img1_hsv = img1_hsv.astype(np.float32)/[180.,255.,255.]
+
+    img2_hsv = cv2.cvtColor(img2, cv2.COLOR_BGR2HSV)
+    img2_hsv = img2_hsv.astype(np.float32)/[180.,255.,255.]
+    image, (x,y) = transform(img1_hsv, img2_hsv)
+    end = timer()
+    print 'get_points_2d_g time:',end - start
+    return x,y
+
+
 class Line:
     def __init__(self, normal_image_name, laser_image_name):
         self.n_img = cv2.imread(normal_image_name, cv2.IMREAD_COLOR)
-        self.n_img = cv2.GaussianBlur(self.n_img,(5,5),0)
+        self.n_img = cv2.GaussianBlur(self.n_img,(15,5),0)
 
         self.l_img = cv2.imread(laser_image_name, cv2.IMREAD_COLOR)
-        self.l_img = cv2.GaussianBlur(self.l_img,(5,5),0)
+        self.l_img = cv2.GaussianBlur(self.l_img,(15,5),0)
 
-    def _do_signal_rgb(self):
-        """rgb"""
-        b1,g1,r1 = cv2.split(self.n_img)
-        b2,g2,r2 = cv2.split(self.l_img)
-        rgb2 = b2>>2
-        rgb2 +=r2>>2
-        rgb2 +=g2>>2
-        rgb1 = b1>>2
-        rgb1 +=r1>>2
-        rgb1 +=g1>>2
-        self.signal = cv2.absdiff(rgb2,rgb1)
-
-    def _do_signal_r(self):
-        """r"""
-        b1,g1,r1 = cv2.split(self.n_img)
-        b2,g2,r2 = cv2.split(self.l_img)
-        self.signal = cv2.absdiff(r2,r1)
-
-
-    def _do_mask_rgb(self):
-        self._do_signal_rgb()
-        r, self.mask = cv2.threshold(self.signal, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-        return r
-
-    def _do_mask_r(self):
-        self._do_signal_r()
-        r, self.mask = cv2.threshold(self.signal, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-        return r
-
-    def _do_mask_r_tresh(self, t):
-        self._do_signal_r()
-        r, self.mask = cv2.threshold(self.signal, t, 255, cv2.THRESH_BINARY)
-        return r
-
-    def reduce_pix(self, a):
-        retu = []
-        cy = -1
-        cx = -1
-        cx2 = 0
-        for i in a:
-            x = i[1]
-            y = i[0]
-            if cy != y:
-                if cy >= 0:
-#                    print cx,cy
-                    retu.append(((cx+cx2)/2,cy))
-
-                cy = y
-                cx = x
-                cx2 = x
-            elif x < cx2+5:
-                cx2 = x
-            else:
-#                print '!', cx,cy
-                retu.append(((cx+cx2)/2,cy))
-                cx2 = x
-                cx = x
-        return retu
 
     def get_points_2d_(self):
+        (x,y) = get_points_2d_g(self.n_img, self.l_img)
 #        self._do_mask_rgb()
 #        a = np.argwhere(self.mask)
 #        if len(a) > 25000:
 #            print 'error rgb:', len(a)
-        if True:
-            r = self._do_mask_r()
-            a = np.argwhere(self.mask)
-            if len(a) > 25000:
-                print 'error r:', len(a)
-                self._do_mask_r_tresh(r*2)
-                a = np.argwhere(self.mask)
-                if len(a) > 25000:
-                    print 'error r2:', len(a)
-                    return []
 
-        p = self.reduce_pix(a)
-        if len(p) > 2500:
-            print 'error reduce:', len(p)
+        if len(x) > 3000:
+            print 'error reduce:', len(x)
             return []
-        return p
+        return zip(y,x)
 
     def get_points_2d(self):
         self.points_2d = self.get_points_2d_()

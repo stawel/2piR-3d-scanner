@@ -9,9 +9,6 @@ import cv2
 from matplotlib.patches import Rectangle
 from matplotlib.collections import PatchCollection
 import matplotlib
-from scipy.signal import argrelmax, argrelmin
-from scipy.ndimage.filters import gaussian_filter,gaussian_filter1d
-from timeit import default_timer as timer
 
 file_nr = 10334
 file_nr = 10032
@@ -21,6 +18,10 @@ name2 = str(file_nr+1) + '.jpg'
 
 
 N = 5
+
+from scipy.signal import argrelmax, argrelmin
+from scipy.ndimage.filters import gaussian_filter,gaussian_filter1d
+from timeit import default_timer as timer
 
 def bright_mask(h1,s1,v1,h2,s2,v2):
     # bright objects
@@ -58,7 +59,7 @@ def wrap_red(h):
 def split(img):
     return wrap_red(img[:,:,0]),img[:,:,1],img[:,:,2]
 
-def transform(img1,img2):
+def transform(img1, img2):
     img1 = img1.copy()
     img2 = img2.copy()
     h1,s1,v1 = split(img1)
@@ -89,7 +90,16 @@ def transform(img1,img2):
 #    res[mask_not_brighter] = [0.,0.,0.]
 #    res[mask_not_b] = [0.,0.,0.]
 #    res[mask_not_r] = [0.,0.,0.]
-    return res
+    return res, (x,y)
+
+def get_points_2d_(img1, img2):
+    img1_hsv = cv2.cvtColor(img1, cv2.COLOR_BGR2HSV);
+    img1_hsv = img1_hsv.astype(np.float32)/[180.,255.,255.]
+
+    img2_hsv = cv2.cvtColor(img2, cv2.COLOR_BGR2HSV)
+    img2_hsv = img2_hsv.astype(np.float32)/[180.,255.,255.]
+    image, (x,y)
+    return x,y
 
 # Load an color image in grayscale
 img1 = cv2.imread(name1,cv2.IMREAD_COLOR)
@@ -106,7 +116,7 @@ img2_hsv = cv2.cvtColor(img2, cv2.COLOR_BGR2HSV)
 img2_hsv_dis = img2_hsv
 img2_hsv = img2_hsv.astype(np.float32)/[180.,255.,255.]
 
-img2_hsv_dis = transform(img1_hsv, img2_hsv)
+img2_hsv_dis, xy = transform(img1_hsv, img2_hsv)
 #img2_hsv_dis = img2_hsv_dis.astype(np.float32)/[180.,255.,255.]
 
 
