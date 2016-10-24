@@ -50,25 +50,51 @@ hs_b, = plt.plot([], [], 'g.', markersize=msize)
 #plt.ylabel("S")
 plt.axis([0., 1., 0., 1.])
 
+r_x, r_y = 0, 0
+def set_rectangle_xy(x,y, N):
+    global r_x, r_y
+    x, y = int(x), int(y)
+    r_x, r_y = x, y
+    n_hsv1 = img1_hsv[y-N:y+N,x-N:x+N].reshape(4*N*N,3)
+    n_hsv2 = img2_hsv[y-N:y+N,x-N:x+N].reshape(4*N*N,3)
+    hv_b.set_data(n_hsv1[:,0], n_hsv1[:,2])
+    hs_b.set_data(n_hsv1[:,1], n_hsv1[:,2])
+    hv_r.set_data(n_hsv2[:,0], n_hsv2[:,2])
+    hs_r.set_data(n_hsv2[:,1], n_hsv2[:,2])
+    rectangle.set_xy(np.array([x-N,y-N]))
+
+    rectangle.set_width(2*N)
+    rectangle.set_height(2*N)
+    rectangle.set_xy(np.array([x-N,y-N]))
+    fig.canvas.draw()
+
 
 def onclick(event):
     if ax == event.inaxes and event.button == 1:
-        x = int(event.xdata)
-        y = int(event.ydata)
-        n_hsv1 = img1_hsv[y-N:y+N,x-N:x+N].reshape(4*N*N,3)
-        n_hsv2 = img2_hsv[y-N:y+N,x-N:x+N].reshape(4*N*N,3)
-        hv_b.set_data(n_hsv1[:,0], n_hsv1[:,2])
-        hs_b.set_data(n_hsv1[:,1], n_hsv1[:,2])
-        hv_r.set_data(n_hsv2[:,0], n_hsv2[:,2])
-        hs_r.set_data(n_hsv2[:,1], n_hsv2[:,2])
-        rectangle.set_xy(np.array([x-N,y-N]))
-
-        fig.canvas.draw()
-    
+        set_rectangle_xy(event.xdata, event.ydata, N)
     print 'button=%d, x=%d, y=%d, xdata=%f, ydata=%f'%(
         event.button, event.x, event.y, event.xdata, event.ydata)
 
 
+def onbutton(event):
+    global N, r_x, r_y
+    if event.key == 'x':
+        r_y+=1
+    if event.key == 'w':
+        r_y-=1
+    if event.key == 'a':
+        r_x-=1
+    if event.key == 'd':
+        r_x+=1
+    if event.key == 'q':
+        N-=1
+    if event.key == 'e':
+        N+=1
+
+    set_rectangle_xy(r_x,r_y, N)
+    print 'key=', event.key, 'event=', event
+
+cid = fig.canvas.mpl_connect('key_press_event', onbutton)
 cid = fig.canvas.mpl_connect('button_press_event', onclick)
 
 

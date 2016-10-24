@@ -10,8 +10,8 @@ from matplotlib.patches import Rectangle
 from matplotlib.collections import PatchCollection
 import matplotlib
 
-file_nr = 10334
-file_nr = 10032
+file_nr = 13090
+file_nr = 11050
 
 name1 = str(file_nr) + '.jpg'
 name2 = str(file_nr+1) + '.jpg'
@@ -79,7 +79,7 @@ def transform(img1, img2):
     mask =np.logical_or(mask_not_r, np.logical_and(mask_not_brighter,mask_not_b))
 #    mask =np.logical_or(mask_not_r, mask_not_brighter)
 
-    res[mask] = [0.,0.,0.]
+#    res[mask] = [0.,0.,0.]
 #    print x,y
     res[x,y] = [0.5,1.,1.]
 #    res[x+1,y] = [0.5,1.,1.]
@@ -139,25 +139,49 @@ ax3d.set_xlabel('H')
 ax3d.set_ylabel('S')
 ax3d.set_zlabel('V')
 
+r_x, r_y = 0, 0
+def set_rectangle_xy(x,y, N):
+    global r_x, r_y
+    x, y = int(x), int(y)
+    r_x, r_y = x, y
+    n_hsv1 = img1_hsv[y-N:y+N,x-N:x+N].reshape(4*N*N,3)
+    n_hsv2 = img2_hsv[y-N:y+N,x-N:x+N].reshape(4*N*N,3)
+    hsv_b.set_data(n_hsv1[:,0], n_hsv1[:,1])
+    hsv_b.set_3d_properties(n_hsv1[:,2])
+    hsv_r.set_data(n_hsv2[:,0], n_hsv2[:,1])
+    hsv_r.set_3d_properties(n_hsv2[:,2])
+    rectangle.set_width(2*N)
+    rectangle.set_height(2*N)
+    rectangle.set_xy(np.array([x-N,y-N]))
+    fig.canvas.draw()
+
 
 def onclick(event):
     if ax == event.inaxes and event.button == 1:
-        x = int(event.xdata)
-        y = int(event.ydata)
-        n_hsv1 = img1_hsv[y-N:y+N,x-N:x+N].reshape(4*N*N,3)
-        n_hsv2 = img2_hsv[y-N:y+N,x-N:x+N].reshape(4*N*N,3)
-        hsv_b.set_data(n_hsv1[:,0], n_hsv1[:,1])
-        hsv_b.set_3d_properties(n_hsv1[:,2])
-        hsv_r.set_data(n_hsv2[:,0], n_hsv2[:,1])
-        hsv_r.set_3d_properties(n_hsv2[:,2])
-        rectangle.set_xy(np.array([x-N,y-N]))
-
-        fig.canvas.draw()
-
+        set_rectangle_xy(event.xdata, event.ydata, N)
     print 'button=%d, x=%d, y=%d, xdata=%f, ydata=%f'%(
         event.button, event.x, event.y, event.xdata, event.ydata)
 
 
+def onbutton(event):
+    global N, r_x, r_y
+    if event.key == 'x':
+        r_y+=1
+    if event.key == 'w':
+        r_y-=1
+    if event.key == 'a':
+        r_x-=1
+    if event.key == 'd':
+        r_x+=1
+    if event.key == 'q':
+        N-=1
+    if event.key == 'e':
+        N+=1
+
+    set_rectangle_xy(r_x,r_y, N)
+    print 'key=', event.key, 'event=', event
+
+cid = fig.canvas.mpl_connect('key_press_event', onbutton)
 cid = fig.canvas.mpl_connect('button_press_event', onclick)
 
 
