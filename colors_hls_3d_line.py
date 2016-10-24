@@ -21,7 +21,7 @@ name2 = path + str(file_nr+1) + '.jpg'
 N = 5
 
 
-def transform(disp_img, img1, img2, t=4):
+def transform(disp_img, img1, img2, t=25):
     res = disp_img
     mask, (x,y) = pi2R.lines2d.transform(img1, img2, t)
 
@@ -100,7 +100,7 @@ def onclick(event):
     print 'button=%d, x=%d, y=%d, xdata=%f, ydata=%f'%(
         event.button, event.x, event.y, event.xdata, event.ydata)
 
-r_t = 4.
+r_t = 15.
 
 def onbutton(event):
     global N, r_x, r_y, r_t, disp_img

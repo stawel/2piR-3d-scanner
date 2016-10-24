@@ -21,9 +21,8 @@ def bright_mask(h1,s1,v1,h2,s2,v2):
     mask_satur = s2+0.05 < s1
     return np.logical_and(np.logical_and(mask_bright1, mask_bright2),mask_satur)
 
-def max_laser(y, d, not_mask):
+def max_laser(y):
     start = timer()
-    y[not_mask] = d
 
 #    y = gaussian_filter1d(y, sigma=2, axis=1)
 #    y = gaussian_filter(y, sigma=2)
@@ -45,28 +44,36 @@ def split(img):
     return img[:,:,0],img[:,:,1],img[:,:,2]
 
 y_data = []
-kernel_size = 59
-#kernel = np.outer(signal.gaussian(kernel_size, t), signal.gaussian(kernel_size, t))
-kernel = np.outer(signal.flattop(kernel_size),signal.flattop(kernel_size))
 
-def transform(img1, img2, t=4):
+def transform(img1, img2, t=25):
     global y_data, kernel
     start = timer()
     h1,l1,s1 = split(img1)
     h2,l2,s2 = split(img2)
-    y_data = l2-l1#+(s2-s1)*0.3
+
+    y_data = l2-l1
+    y_data[y_data<0.02] = 0.02
+
+    kernel_size_x = 25
+    kernel_size_y = 11
+    kernel_x = np.ones((kernel_size_x), dtype=np.float32)*-1
+    kernel_x[kernel_size_x/4:kernel_size_x*3/4] = 1.
+    kernel = np.outer(signal.gaussian(kernel_size_y,7),kernel_x)
+    kernel/=kernel_size_y*kernel_size_x*2
+
     y_data = signal.fftconvolve(y_data, kernel, mode='same')
-#    w = l2 > 0.4
-#    y_data[w] += (s2-s1)[w]
-    d = y_data.max()/4.
-#    mask_brighter = np.logical_and(y > d, l2 > 0.15)
-    mask_brighter = y_data > d
-    (sy,sx,sz) = img2.shape
-    mask_brighter[sy-10:sy,:] = False
 
-    mask_not = np.logical_not(mask_brighter)
-
-    x,y = max_laser(y_data, d, mask_not)
+    ymax = y_data.max()
+    print 'kernel sum:', kernel.sum(), 'ymax:', ymax
+    d = ymax/40
+    #d = 0
+    mask_not = y_data < d
+    mask_not[:,0:20] = True
+    mask_not[:,-20:] = True
+    mask_not[0:20,:] = True
+    mask_not[-20:,:] = True
+    y_data[mask_not] = d
+    x,y = max_laser(y_data)
 
     end = timer()
     print 'transform time:',end - start
