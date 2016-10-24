@@ -5,6 +5,8 @@ import numpy as np
 import cv2
 import math
 import scipy.ndimage as ndimage
+import scipy.signal as signal
+
 
 from scipy.signal import argrelmax, argrelmin
 from scipy.ndimage.filters import gaussian_filter,gaussian_filter1d
@@ -22,6 +24,7 @@ def bright_mask(h1,s1,v1,h2,s2,v2):
 def max_laser(y, d, not_mask):
     start = timer()
     y[not_mask] = d
+
 #    y = gaussian_filter1d(y, sigma=2, axis=1)
 #    y = gaussian_filter(y, sigma=2)
 #    y[not_mask] = d
@@ -42,22 +45,20 @@ def split(img):
     return img[:,:,0],img[:,:,1],img[:,:,2]
 
 y_data = []
-def transform(img1, img2):
-    global y_data
+kernel_size = 59
+#kernel = np.outer(signal.gaussian(kernel_size, t), signal.gaussian(kernel_size, t))
+kernel = np.outer(signal.flattop(kernel_size),signal.flattop(kernel_size))
+
+def transform(img1, img2, t=4):
+    global y_data, kernel
     start = timer()
     h1,l1,s1 = split(img1)
     h2,l2,s2 = split(img2)
-
-#    l1 = ndimage.gaussian_filter1d(l1, 3, axis=1)
-#    l2 = ndimage.gaussian_filter1d(l2, 3, axis=1)
-#    l1 = ndimage.gaussian_filter1d(l1, 3, axis=0)
-#    l2 = ndimage.gaussian_filter1d(l2, 3, axis=0)
-#    s1 = ndimage.gaussian_filter1d(l1, 3, axis=1)
-#    s2 = ndimage.gaussian_filter1d(l2, 3, axis=1)
     y_data = l2-l1#+(s2-s1)*0.3
+    y_data = signal.fftconvolve(y_data, kernel, mode='same')
 #    w = l2 > 0.4
 #    y_data[w] += (s2-s1)[w]
-    d = 0.00
+    d = y_data.max()/4.
 #    mask_brighter = np.logical_and(y > d, l2 > 0.15)
     mask_brighter = y_data > d
     (sy,sx,sz) = img2.shape

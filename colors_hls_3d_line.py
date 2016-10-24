@@ -11,7 +11,7 @@ from matplotlib.collections import PatchCollection
 import matplotlib
 import pi2R.lines2d
 file_nr = 13090
-#file_nr = 11050
+file_nr = 11050
 
 path = './s4/'
 name1 = path + str(file_nr) + '.jpg'
@@ -21,9 +21,9 @@ name2 = path + str(file_nr+1) + '.jpg'
 N = 5
 
 
-def transform(disp_img, img1, img2):
+def transform(disp_img, img1, img2, t=4):
     res = disp_img
-    mask, (x,y) = pi2R.lines2d.transform(img1, img2)
+    mask, (x,y) = pi2R.lines2d.transform(img1, img2, t)
 
     res[mask] = [0.,0.,0.]
     color = [0,255,255]
@@ -34,6 +34,10 @@ def transform(disp_img, img1, img2):
     res[x,y-1] = color
 
     return res, (x,y)
+
+def norm2(a):
+    a /=a.max()
+    return a
 
 
 # Load an color image in grayscale
@@ -56,8 +60,8 @@ fig = plt.figure()
 
 ax = fig.add_subplot(1,2,1)
 
-#imgplot = ax.imshow(disp_img)
-imgplot = ax.imshow(pi2R.lines2d.y_data)
+imgplot = ax.imshow(disp_img)
+#imgplot = ax.imshow(norm2(pi2R.lines2d.y_data))
 
 rectangle = ax.add_patch(Rectangle((0, 0),2*N,2*N,alpha=0.2))
 
@@ -96,9 +100,11 @@ def onclick(event):
     print 'button=%d, x=%d, y=%d, xdata=%f, ydata=%f'%(
         event.button, event.x, event.y, event.xdata, event.ydata)
 
+r_t = 4.
 
 def onbutton(event):
-    global N, r_x, r_y
+    global N, r_x, r_y, r_t, disp_img
+    dt=1
     if event.key == 'x':
         r_y+=1
     if event.key == 'w':
@@ -111,6 +117,16 @@ def onbutton(event):
         N-=1
     if event.key == 'e':
         N+=1
+    if event.key == 'r':
+        r_t-=dt
+    if event.key == 't':
+        r_t+=dt
+
+    disp_img, xy = transform(disp_img, img1_hls, img2_hls, r_t)
+    imgplot.set_data(norm2(pi2R.lines2d.y_data))
+    fig.canvas.draw()
+    print 'r_t:',r_t
+
 
     set_rectangle_xy(r_x,r_y, N)
     print 'key=', event.key, 'event=', event
