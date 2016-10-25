@@ -11,7 +11,8 @@ from matplotlib.collections import PatchCollection
 import matplotlib
 import pi2R.lines2d
 file_nr = 13090
-file_nr = 11050
+#file_nr = 11050
+file_nr = 12000
 
 path = './s4/'
 name1 = path + str(file_nr) + '.jpg'
@@ -25,10 +26,10 @@ def transform(disp_img, img1, img2, t=25):
     res = disp_img
     mask, (x,y) = pi2R.lines2d.transform(img1, img2, t)
 
-    res[mask] = [0.,0.,0.]
+#    res[mask] = [0.,0.,0.]
     color = [0,255,255]
     res[x,y] = color
-#    res[x+1,y] = color
+    res[x+1,y] = color
     res[x-1,y] = color
     res[x,y+1] = color
     res[x,y-1] = color

@@ -31,7 +31,7 @@ cam_laser = CamLaser(cam_O=v(0.,0.,0.),cam_C=v(0.,1.,0.),
                      cam_DX=v(0.855/1944.,0.,0.), cam_DY=v(0.,0.,0.995/2592.), cam_resolution=v2(1944.,2592.),
                      laser_N=lN, laser_O=v(-0.37,0.,0.))
 
-for i in range(10000,10500,20):
+for i in range(12000,12500,20):
 
     start = timer()
     line = Line(path + str(i) + ".jpg", path + str(i+1) + ".jpg")

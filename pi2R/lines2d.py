@@ -52,21 +52,24 @@ def transform(img1, img2, t=25):
     h2,l2,s2 = split(img2)
 
     y_data = l2-l1
-    y_data[y_data<0.02] = 0.02
+    dy = 0.03
+    y_data[y_data<dy] = dy
 
     kernel_size_x = 25
     kernel_size_y = 11
     kernel_x = np.ones((kernel_size_x), dtype=np.float32)*-1
-    kernel_x[kernel_size_x/4:kernel_size_x*3/4] = 1.
-    kernel = np.outer(signal.gaussian(kernel_size_y,7),kernel_x)
-    kernel/=kernel_size_y*kernel_size_x*2
-
+    kernel_x[kernel_size_x/4:(kernel_size_x*3)/4] = 1.
+    kernel = np.outer(signal.gaussian(kernel_size_y,7,),kernel_x)
+#    kernel/= kernel.sum()#kernel_size_y*kernel_size_x*2
+    kernel.astype(np.float32)
+#    a = kernel.sum()
     y_data = signal.fftconvolve(y_data, kernel, mode='same')
 
     ymax = y_data.max()
     print 'kernel sum:', kernel.sum(), 'ymax:', ymax
-    d = ymax/40
-    #d = 0
+    #d = ymax/10
+    print y_data
+    d = 0.5
     mask_not = y_data < d
     mask_not[:,0:20] = True
     mask_not[:,-20:] = True
@@ -74,6 +77,9 @@ def transform(img1, img2, t=25):
     mask_not[-20:,:] = True
     y_data[mask_not] = d
     x,y = max_laser(y_data)
+
+#    y_data = (l2-l1)
+
 
     end = timer()
     print 'transform time:',end - start

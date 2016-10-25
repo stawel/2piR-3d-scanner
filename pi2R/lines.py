@@ -120,7 +120,7 @@ class Line:
 #        if len(a) > 25000:
 #            print 'error rgb:', len(a)
 
-        if len(x) > 2*3500:
+        if len(x) > 3500:
             print 'error reduce:', len(x)
             return []
         return zip(y,x)
