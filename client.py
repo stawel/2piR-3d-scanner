@@ -5,6 +5,7 @@ import struct
 import time
 import picamera
 import RPi.GPIO as GPIO
+from fractions import Fraction
 
 from pi2R.hardware import *
 
@@ -24,12 +25,39 @@ pos = 0
 # Make a file-like object out of the connection
 connection = client_socket.makefile('wb')
 try:
-    camera = picamera.PiCamera()
+    camera = picamera.PiCamera(resolution=(2592,1944), framerate=Fraction(5, 1))
     #camera.resolution = (640, 480)
-    camera.resolution = (2592,1944)
+#    camera.resolution = (2592,1944)
     # Start a preview and let the camera warm up for 2 seconds
+    laser(1)
     camera.start_preview()
-    time.sleep(2)
+
+    camera.shutter_speed = 200*1000
+#    camera.contrast=100
+    camera.brightness=45
+    camera.sharpness=-100
+
+#    camera.iso = 800
+
+    time.sleep(10)
+    
+    camera.shutter_speed = camera.exposure_speed
+    camera.exposure_mode = 'off'
+    g = camera.awb_gains
+    camera.awb_mode = 'off'
+    camera.awb_gains = g
+    
+    print 'awb_gains:', camera.awb_gains
+    print 'exposure_speed:',camera.exposure_speed
+    print 'brightness:',camera.brightness
+    print 'digital_gain:',camera.digital_gain
+    print 'contrast:',camera.contrast
+#    print 'clock_mode:',camera.clock_mode
+    print 'analog_gain:', camera.analog_gain
+    print 'sharpness:', camera.sharpness
+
+    laser(0)
+#    camera.brightness = 25
 
     # Note the start time and construct a stream to hold image data
     # temporarily (we could write it directly to connection but in this
@@ -40,6 +68,16 @@ try:
     for foo in camera.capture_continuous(stream, 'jpeg',burst=False):
         # Write the length of the capture to the stream and flush to
         # ensure it actually gets sent
+
+        print 'awb_gains:', camera.awb_gains
+        print 'exposure_speed:',camera.exposure_speed
+        print 'brightness:',camera.brightness
+        print 'digital_gain:',camera.digital_gain
+        print 'contrast:',camera.contrast
+#    print 'clock_mode:',camera.clock_mode
+        print 'analog_gain:', camera.analog_gain
+
+
         length = stream.tell()
         connection.write(struct.pack('<L', length))
         connection.flush()

@@ -5,6 +5,7 @@ import struct
 import time
 import picamera
 import RPi.GPIO as GPIO
+from fractions import Fraction
 
 # Connect a client socket to my_server:8000 (change my_server to the
 # hostname of your server)
@@ -19,12 +20,15 @@ state = True
 # Make a file-like object out of the connection
 connection = client_socket.makefile('wb')
 try:
-    camera = picamera.PiCamera()
+#    camera = picamera.PiCamera()
+    camera = picamera.PiCamera(resolution=(2592,1944), framerate=Fraction(5, 1))
     #camera.resolution = (640, 480)
-    camera.resolution = (2592,1944)
+#    camera.resolution = (2592,1944)
     # Start a preview and let the camera warm up for 2 seconds
     camera.start_preview()
+    camera.shutter_speed = 200*1000
     time.sleep(2)
+
 
     # Note the start time and construct a stream to hold image data
     # temporarily (we could write it directly to connection but in this
@@ -36,6 +40,14 @@ try:
         camera.capture(stream, format='jpeg', bayer=True)
         # Write the length of the capture to the stream and flush to
         # ensure it actually gets sent
+        print 'awb_gains:', camera.awb_gains
+        print 'exposure_speed:',camera.exposure_speed
+        print 'brightness:',camera.brightness
+        print 'digital_gain:',camera.digital_gain
+        print 'contrast:',camera.contrast
+#    print 'clock_mode:',camera.clock_mode
+        print 'analog_gain:', camera.analog_gain
+        print 'sharpness:', camera.sharpness
 	length = stream.tell()
         connection.write(struct.pack('<L', length))
         connection.flush()
