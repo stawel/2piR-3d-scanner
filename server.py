@@ -5,6 +5,7 @@ import struct
 from PIL import Image
 import cv2
 import numpy as np
+import os
 
 # Start a socket listening for connections on 0.0.0.0:8000 (0.0.0.0 means
 # all interfaces)
@@ -19,6 +20,10 @@ connection = server_socket.accept()[0].makefile('rb')
 cv2.namedWindow('image', cv2.WINDOW_NORMAL)
 
 i = 10000
+
+path = './scans/s/'
+
+#os.mkdir(path)
 
 try:
     while True:
@@ -42,7 +47,7 @@ try:
         image = cv2.transpose(image)
         image = cv2.flip(image, 0)
         cv2.imshow('image', image)
-        cv2.imwrite(str(i) + '.jpg',image)
+        cv2.imwrite(path + str(i) + '.jpg',image)
         i = i + 1
 
         height, width, channels = image.shape

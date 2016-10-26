@@ -14,7 +14,9 @@ file_nr = 13090
 #file_nr = 11050
 file_nr = 12000
 
-path = './s4/'
+file_nr = 10000
+
+path = './scans/s/'
 name1 = path + str(file_nr) + '.jpg'
 name2 = path + str(file_nr+1) + '.jpg'
 

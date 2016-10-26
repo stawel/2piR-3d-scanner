@@ -116,12 +116,13 @@ try:
         data = getimg(image_stream)
 #        data = np.fromstring(image_stream.getvalue(), dtype=np.uint8)
 #        image = cv2.imdecode(data,cv2.IMREAD_COLOR)
-        image=data
-        cv2.imshow('image', image)
-        cv2.imwrite(str(i) + '.jpg',image>>8)
+        image2=data
+        cv2.imshow('image', image2)
+        print image2.shape, image2.dtype
+        cv2.imwrite(str(i) + '.tif',image2)
         i = i + 1
 
-        print image_len, image.shape
+        print image_len, image2.shape
 
 finally:
     connection.close()
