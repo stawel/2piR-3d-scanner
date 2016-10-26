@@ -16,7 +16,7 @@ file_nr = 12000
 
 file_nr = 10000
 
-path = './scans/s/'
+path = './scans/r/'
 name1 = path + str(file_nr) + '.jpg'
 name2 = path + str(file_nr+1) + '.jpg'
 
@@ -29,7 +29,7 @@ def transform(disp_img, img1, img2, t=25):
     mask, (x,y) = pi2R.lines2d.transform(img1, img2, t)
 
 #    res[mask] = [0.,0.,0.]
-    color = [0,255,255]
+    color = [0,1.,1.]
     res[x,y] = color
     res[x+1,y] = color
     res[x-1,y] = color
@@ -46,13 +46,15 @@ def norm2(a):
 # Load an color image in grayscale
 img1 = cv2.imread(name1,cv2.IMREAD_COLOR)
 #img1 = cv2.GaussianBlur(img1,(15,5),0)
+img1 = img1.astype(np.float32)/255.
 img1_hls = cv2.cvtColor(img1, cv2.COLOR_BGR2HLS);
-img1_hls = img1_hls.astype(np.float32)/[180.,255.,255.]
+
+#img1_hls = img1_hls.astype(np.float32)/[180.,255.,255.]
 
 img2 = cv2.imread(name2,cv2.IMREAD_COLOR)
 #img2 = cv2.GaussianBlur(img2,(15,5),0)
+img2 = img2.astype(np.float32)/255.
 img2_hls = cv2.cvtColor(img2, cv2.COLOR_BGR2HLS)
-img2_hls = img2_hls.astype(np.float32)/[180.,255.,255.]
 
 disp_img = img2[:,:,[2,1,0]]
 
@@ -87,9 +89,9 @@ def set_rectangle_xy(x,y, N):
     r_x, r_y = x, y
     n_hls1 = img1_hls[y-N:y+N,x-N:x+N].reshape(4*N*N,3)
     n_hls2 = img2_hls[y-N:y+N,x-N:x+N].reshape(4*N*N,3)
-    hls_b.set_data(n_hls1[:,0], n_hls1[:,1])
+    hls_b.set_data(n_hls1[:,0]/360., n_hls1[:,1])
     hls_b.set_3d_properties(n_hls1[:,2])
-    hls_r.set_data(n_hls2[:,0], n_hls2[:,1])
+    hls_r.set_data(n_hls2[:,0]/360., n_hls2[:,1])
     hls_r.set_3d_properties(n_hls2[:,2])
     rectangle.set_width(2*N)
     rectangle.set_height(2*N)
