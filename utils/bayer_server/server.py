@@ -6,6 +6,7 @@ from PIL import Image
 import cv2
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
+import cv2.cv as cv
 #import picamera.array
 
 # Start a socket listening for connections on 0.0.0.0:8000 (0.0.0.0 means
@@ -119,7 +120,7 @@ try:
         image2=data
         cv2.imshow('image', image2)
         print image2.shape, image2.dtype
-        cv2.imwrite(str(i) + '.tif',image2)
+        cv2.imwrite(str(i) + '.png',image2,[cv2.cv.CV_IMWRITE_PNG_COMPRESSION, 9])
         i = i + 1
 
         print image_len, image2.shape
