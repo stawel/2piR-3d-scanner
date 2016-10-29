@@ -10,6 +10,9 @@ from fractions import Fraction
 from pi2R.hardware import *
 
 
+img_type = 2
+img_type = 1 #bayer
+
 stepper_init()
 laser_init()
 
@@ -24,6 +27,18 @@ state = True
 pos = 0
 # Make a file-like object out of the connection
 connection = client_socket.makefile('wb')
+
+def camera_info(camera):
+    print 'awb_gains:', camera.awb_gains
+    print 'exposure_speed:',camera.exposure_speed
+    print 'brightness:',camera.brightness
+    print 'digital_gain:',camera.digital_gain
+    print 'contrast:',camera.contrast
+#    print 'clock_mode:',camera.clock_mode
+    print 'analog_gain:', camera.analog_gain
+    print 'sharpness:', camera.sharpness
+
+
 try:
     camera = picamera.PiCamera(resolution=(2592,1944), framerate=Fraction(5, 1))
     #camera.resolution = (640, 480)
@@ -34,8 +49,8 @@ try:
 
     camera.shutter_speed = 200*1000
 #    camera.contrast=100
-    camera.brightness=45
-    camera.sharpness=-100
+#    camera.brightness=45
+#    camera.sharpness=-100
 
 #    camera.iso = 800
 
@@ -47,15 +62,8 @@ try:
     camera.awb_mode = 'off'
     camera.awb_gains = g
     
-    print 'awb_gains:', camera.awb_gains
-    print 'exposure_speed:',camera.exposure_speed
-    print 'brightness:',camera.brightness
-    print 'digital_gain:',camera.digital_gain
-    print 'contrast:',camera.contrast
-#    print 'clock_mode:',camera.clock_mode
-    print 'analog_gain:', camera.analog_gain
-    print 'sharpness:', camera.sharpness
 
+    camera_info(camera)
     laser(0)
 #    camera.brightness = 25
 
@@ -65,20 +73,21 @@ try:
     # our protocol simple)
     start = time.time()
     stream = io.BytesIO()
-    for foo in camera.capture_continuous(stream, 'jpeg',burst=False):
+
+    if img_type == 1:
+        img_bayer = True
+    else:
+        img_bayer = False
+
+    for foo in range(1,20000):
+        camera.capture(stream, 'jpeg', bayer=img_bayer)
         # Write the length of the capture to the stream and flush to
         # ensure it actually gets sent
 
-        print 'awb_gains:', camera.awb_gains
-        print 'exposure_speed:',camera.exposure_speed
-        print 'brightness:',camera.brightness
-        print 'digital_gain:',camera.digital_gain
-        print 'contrast:',camera.contrast
-#    print 'clock_mode:',camera.clock_mode
-        print 'analog_gain:', camera.analog_gain
-
+        camera_info(camera)
 
         length = stream.tell()
+        connection.write(struct.pack('<L', img_type))
         connection.write(struct.pack('<L', length))
         connection.flush()
         # Rewind the stream and send the image data over the wire
@@ -101,6 +110,7 @@ try:
             laser(1)
 
     # Write a length of zero to the stream to signal we're done
+    connection.write(struct.pack('<L', img_type))
     connection.write(struct.pack('<L', 0))
 finally:
     connection.close()
