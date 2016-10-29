@@ -17,7 +17,7 @@ file_nr = 12000
 file_nr = 10000
 
 path = './scans/s/'
-extension = '.tif'
+extension = '.png'
 name1 = path + str(file_nr) + extension
 name2 = path + str(file_nr+1) + extension
 
