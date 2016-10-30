@@ -14,9 +14,9 @@ file_nr = 13090
 #file_nr = 11050
 file_nr = 12000
 
-file_nr = 10000
+file_nr = 15860
 
-path = './scans/s/'
+path = './scans/p2/'
 extension = '.png'
 name1 = path + str(file_nr) + extension
 name2 = path + str(file_nr+1) + extension
@@ -26,16 +26,16 @@ N = 5
 
 
 def transform(disp_img, img1, img2, t=25):
-    res = disp_img
+    res = disp_img.copy()
     mask, (x,y) = pi2R.lines2d.transform(img1, img2, t)
 
 #    res[mask] = [0.,0.,0.]
     color = [0,1.,1.]
     res[x,y] = color
-    res[x+1,y] = color
-    res[x-1,y] = color
-    res[x,y+1] = color
-    res[x,y-1] = color
+#    res[x+1,y] = color
+#    res[x-1,y] = color
+#    res[x,y+1] = color
+#    res[x,y-1] = color
 
     return res, (x,y)
 
@@ -45,28 +45,28 @@ def norm2(a):
 
 
 # Load an color image in grayscale
-img1 = cv2.imread(name1,cv2.IMREAD_COLOR)
+img1 = cv2.imread(name1,cv2.IMREAD_UNCHANGED)
 #img1 = cv2.GaussianBlur(img1,(15,5),0)
-img1 = img1.astype(np.float32)/255.
+img1 = img1.astype(np.float32)/float(np.iinfo(img1.dtype).max)
 img1_hls = cv2.cvtColor(img1, cv2.COLOR_BGR2HLS);
 
 #img1_hls = img1_hls.astype(np.float32)/[180.,255.,255.]
 
-img2 = cv2.imread(name2,cv2.IMREAD_COLOR)
+img2 = cv2.imread(name2,cv2.IMREAD_UNCHANGED)
 #img2 = cv2.GaussianBlur(img2,(15,5),0)
-img2 = img2.astype(np.float32)/255.
+img2 = img2.astype(np.float32)/float(np.iinfo(img2.dtype).max)
 img2_hls = cv2.cvtColor(img2, cv2.COLOR_BGR2HLS)
 
 disp_img = img2[:,:,[2,1,0]]
 
-disp_img, xy = transform(disp_img, img1_hls, img2_hls)
+disp_img2, xy = transform(disp_img, img1_hls, img2_hls)
 
 
 fig = plt.figure()
 
 ax = fig.add_subplot(1,2,1)
 
-imgplot = ax.imshow(disp_img)
+imgplot = ax.imshow(disp_img2)
 #imgplot = ax.imshow(norm2(pi2R.lines2d.y_data))
 
 rectangle = ax.add_patch(Rectangle((0, 0),2*N,2*N,alpha=0.2))
@@ -106,11 +106,11 @@ def onclick(event):
     print 'button=%d, x=%d, y=%d, xdata=%f, ydata=%f'%(
         event.button, event.x, event.y, event.xdata, event.ydata)
 
-r_t = 15.
+r_t = 1
 
 def onbutton(event):
     global N, r_x, r_y, r_t, disp_img
-    dt=1
+    dt=0.1
     if event.key == 'x':
         r_y+=1
     if event.key == 'w':
@@ -128,8 +128,8 @@ def onbutton(event):
     if event.key == 't':
         r_t+=dt
 
-    disp_img, xy = transform(disp_img, img1_hls, img2_hls, r_t)
-    imgplot.set_data(norm2(pi2R.lines2d.y_data))
+    disp_img2, xy = transform(disp_img, img1_hls, img2_hls, r_t)
+    imgplot.set_data(norm2(disp_img2))
     fig.canvas.draw()
     print 'r_t:',r_t
 

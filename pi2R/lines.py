@@ -60,9 +60,7 @@ class CamLaser:
         self.calc_()
 
     def calc_(self):
-#        print 'D=', self.laser_D
         self.a = -self.laser_D-np.dot(self.n_laser_N, self.n_cam_O)
-#        print 'a=', self.a
 
     def get_point_3d(self, point_2d):
         point_2d -= self.cam_resolution_2
@@ -107,19 +105,17 @@ class CamLaser:
 
 class Line:
     def __init__(self, normal_image_name, laser_image_name):
-        self.n_img = cv2.imread(normal_image_name, cv2.IMREAD_COLOR)
+        self.n_img = cv2.imread(normal_image_name, cv2.IMREAD_UNCHANGED)
+        self.n_img = self.n_img.astype(np.float32)/float(np.iinfo(self.n_img.dtype).max)
         #self.n_img = cv2.GaussianBlur(self.n_img,(15,5),0)
-        self.l_img = cv2.imread(laser_image_name, cv2.IMREAD_COLOR)
+        self.l_img = cv2.imread(laser_image_name, cv2.IMREAD_UNCHANGED)
+        self.l_img = self.l_img.astype(np.float32)/float(np.iinfo(self.l_img.dtype).max)
+
         #self.l_img = cv2.GaussianBlur(self.l_img,(15,5),0)
 
 
     def get_points_2d_(self):
         (x,y) = lines2d.get_points_2d_g(self.n_img, self.l_img)
-#        self._do_mask_rgb()
-#        a = np.argwhere(self.mask)
-#        if len(a) > 25000:
-#            print 'error rgb:', len(a)
-
         if len(x) > 3500:
             print 'error reduce:', len(x)
             return []
@@ -146,7 +142,7 @@ class Line:
         return retu
 
     def get_colors(self):
-        return [self.n_img[x,y] for y,x in self.points_2d]
+        return np.array([self.n_img[x,y] for y,x in self.points_2d])
 
     def get_colors_rgb(self):
-        return [ [r,g,b] for b,g,r in [self.n_img[x,y] for y,x in self.points_2d]]
+        return np.array([ [r,g,b] for b,g,r in [self.n_img[x,y] for y,x in self.points_2d]])

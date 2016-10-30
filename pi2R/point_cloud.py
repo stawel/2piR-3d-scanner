@@ -33,6 +33,8 @@ class PointCloud:
         if len(points) > 0:
             obj = VTKObject()
             obj.CreateFromArray(points)
+            if colors.dtype == np.float32:
+                colors*=256
             obj.AddColors(colors.astype(np.uint8))
             self.pointObjects.append(obj)
             self.renderer.AddActor(obj.GetActor())
@@ -64,6 +66,15 @@ class PointCloud:
     def run(self):
 
         self.addActors()
+
+        transform = vtk.vtkTransform()
+        transform.Translate(1.0, 0.0, 0.0)
+
+        axes = vtk.vtkAxesActor()
+        #  The axes are positioned with a user transform
+#        axes.SetUserTransform(transform)
+        self.renderer.AddActor(axes)
+
     #    renderer.AddActor(pointCloud.vtkActor)
     # Begin Interaction
         self.renderWindow.Render()
