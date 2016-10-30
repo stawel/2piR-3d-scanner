@@ -63,7 +63,7 @@ class PointCloud:
     def addActors(self):
         self.addPointsAktor(np.concatenate(self.p),np.concatenate(self.c))
 
-    def run(self):
+    def run(self, enable_axes = False):
 
         self.addActors()
 
@@ -73,7 +73,8 @@ class PointCloud:
         axes = vtk.vtkAxesActor()
         #  The axes are positioned with a user transform
 #        axes.SetUserTransform(transform)
-        self.renderer.AddActor(axes)
+        if enable_axes:
+            self.renderer.AddActor(axes)
 
     #    renderer.AddActor(pointCloud.vtkActor)
     # Begin Interaction

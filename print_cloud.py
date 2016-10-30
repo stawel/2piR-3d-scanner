@@ -54,5 +54,5 @@ def callback(obj, event):
     pc.addActors()
 
 set_points()
-pc.addSlider(callback)
+#pc.addSlider(callback)
 pc.run()
