@@ -103,6 +103,17 @@ def filter2(div, size = 10):
     ydiv = signal.fftconvolve(div, kernel, mode='same')
     return ydiv/(size*size)
 
+def subpix(x,y, data):
+    points = data[y,[x-1,x,x+1]]
+    c = points[1]
+    m = points[0]
+    p = points[2]
+#    c = data[y,x]
+#    m = data[y,x-1]
+#    p = data[y,x+1]
+    xx = (m-p)/(2*(p+m-2*c))
+#    print xx+x
+    return np.ndarray.astype(xx+x, np.float32),np.ndarray.astype(y, np.float32)
 
 def transform(img1, img2, t=3):
     global kernel, y_data
@@ -130,7 +141,10 @@ def transform(img1, img2, t=3):
 #    np.set_printoptions(threshold=np.nan)
 #    print x.shape
 #    print y.shape
-    return [], (y[mask],x[mask])
+    x = x[mask]
+    y = y[mask]
+    x,y = subpix(x,y,y_t_data)
+    return [], (y,x)
 
 ####################################################3
 

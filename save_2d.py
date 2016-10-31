@@ -13,8 +13,8 @@ import Queue
 
 path = "./scans/p2/"
 extension = '.png'
-out_filename = 'a7.dat'
-threads = 20
+out_filename = 'a8.dat'
+threads = 8
 
 retu = []
 
@@ -30,6 +30,7 @@ def worker_thread():
         line = Line(path + str(i) + extension, path + str(i+1) + extension)
         rp = line.get_points_2d()
         colors = line.get_colors_rgb()*255.
+        colors[colors>255] = 255
         print i, len(rp), len(colors), 'time:', timer() - start
         result_queue.put([i,np.asarray(rp, dtype=np.float32), np.asarray(colors, dtype=np.uint8)])
         work_queue.task_done()

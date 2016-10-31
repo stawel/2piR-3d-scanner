@@ -11,7 +11,7 @@ pc = PointCloud()
 
 filename = 'points2d.dat'
 filename = 'a6.dat'
-filename = 'a7.dat'
+filename = 'a8.dat'
 
 
 
@@ -44,7 +44,9 @@ def set_points(x = 0.50):
         cam_laser.rotate(alfa)
         rp = cam_laser.compute_points_3d(p2d.copy())
         print i, len(rp), len(colors), 'alfa=', alfa
-        pc.addPoints(rp, 2*colors)
+        c = colors.astype(int)*2
+        c[c>255] = 255
+        pc.addPoints(rp, c)
 
 def callback(obj, event):
     v = pc.getSliderValue(obj)

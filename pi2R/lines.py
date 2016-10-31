@@ -120,10 +120,12 @@ class Line:
         if len(x) > 3500:
             print 'error reduce:', len(x), 'name:', self.n_img_name
             return []
-        return zip(y,x)
+        return np.asarray(zip(y,x))
 
     def get_points_2d(self):
         self.points_2d = self.get_points_2d_()
+        self.points_2d_int = self.points_2d.astype(int)
+
         return self.points_2d
 
     def get_points_3d_flat(self, y = 0):
@@ -143,7 +145,7 @@ class Line:
         return retu
 
     def get_colors(self):
-        return np.array([self.n_img[x,y] for y,x in self.points_2d])
+        return np.array([self.n_img[x,y] for y,x in self.points_2d_int])
 
     def get_colors_rgb(self):
-        return np.array([ [r,g,b] for b,g,r in [self.n_img[x,y] for y,x in self.points_2d]])
+        return np.array([ [r,g,b] for b,g,r in [self.n_img[x,y] for y,x in self.points_2d_int]])
