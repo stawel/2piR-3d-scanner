@@ -36,41 +36,42 @@ def split(img):
     return img[:,:,0],img[:,:,1],img[:,:,2]
 
 y_data = []
+kernel_size_x = 15
+kernel_size_y = 15
+kt = 1.8
+kernel = np.outer(signal.gaussian(kernel_size_y,kt,),signal.gaussian(kernel_size_x,kt,))
+kernel.astype(np.float32)
 
 def transform(img1, img2, t=3):
-    global y_data, kernel
+    global kernel, y_data
     start = timer()
     h1,l1,s1 = split(img1)
     h2,l2,s2 = split(img2)
 
-    y_data = l2-l1
-    dy = 0.01
-    y_data[y_data<dy] = -0.02
+    y_t_data = l2-l1
+#    dy = 0.0
+#    y_data[y_data<dy] = -0.2
 
-    kernel_size_x = 15
-    kernel_size_y = 15
-    kt = 1.8
-    kernel = np.outer(signal.gaussian(kernel_size_y,kt,),signal.gaussian(kernel_size_x,kt,))
-    kernel.astype(np.float32)
-    y_data = signal.fftconvolve(y_data, kernel, mode='same')
+    y_t_data = signal.fftconvolve(y_t_data, kernel, mode='same')
 
-    ymax = y_data.max()
+#    ymax = y_data.max()
 #    y_data[500:500+kernel_size_y,500:500+kernel_size_x] = ymax*kernel
 #    print 'kernel sum:', kernel.sum(), 'ymax:', ymax
     #d = ymax/10
 #    print y_data
 #    d = 0.5
-    d=0
-    mask_not = y_data < d
-    mask_not[:,0:20] = True
-    mask_not[:,-20:] = True
-    mask_not[0:20,:] = True
-    mask_not[-20:,:] = True
-    y_data[mask_not] = d
-    x,y = max_laser(y_data)
+    d=0.4
+    mask_not = y_t_data < d
+#    mask_not[:,0:20] = True
+#    mask_not[:,-20:] = True
+#    mask_not[0:20,:] = True
+#    mask_not[-20:,:] = True
+    y_t_data[mask_not] = d
+    x,y = max_laser(y_t_data)
 
 #    y_data = (l2-l1)
 
+    y_data = y_t_data
 
     end = timer()
     print 'transform time:',end - start

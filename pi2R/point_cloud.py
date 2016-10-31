@@ -34,7 +34,7 @@ class PointCloud:
             obj = VTKObject()
             obj.CreateFromArray(points)
             if colors.dtype == np.float32:
-                colors*=256
+                colors*=255.
             obj.AddColors(colors.astype(np.uint8))
             self.pointObjects.append(obj)
             self.renderer.AddActor(obj.GetActor())

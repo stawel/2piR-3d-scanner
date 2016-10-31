@@ -105,6 +105,7 @@ class CamLaser:
 
 class Line:
     def __init__(self, normal_image_name, laser_image_name):
+        self.n_img_name = normal_image_name
         self.n_img = cv2.imread(normal_image_name, cv2.IMREAD_UNCHANGED)
         self.n_img = self.n_img.astype(np.float32)/float(np.iinfo(self.n_img.dtype).max)
         #self.n_img = cv2.GaussianBlur(self.n_img,(15,5),0)
@@ -117,7 +118,7 @@ class Line:
     def get_points_2d_(self):
         (x,y) = lines2d.get_points_2d_g(self.n_img, self.l_img)
         if len(x) > 3500:
-            print 'error reduce:', len(x)
+            print 'error reduce:', len(x), 'name:', self.n_img_name
             return []
         return zip(y,x)
 

@@ -14,7 +14,9 @@ file_nr = 13090
 #file_nr = 11050
 file_nr = 12000
 
-file_nr = 15860
+#file_nr = 14400
+
+file_nr = 10018
 
 path = './scans/p2/'
 extension = '.png'
@@ -29,8 +31,11 @@ def transform(disp_img, img1, img2, t=25):
     res = disp_img.copy()
     mask, (x,y) = pi2R.lines2d.transform(img1, img2, t)
 
+    res = pi2R.lines2d.y_data.copy()
+
 #    res[mask] = [0.,0.,0.]
     color = [0,1.,1.]
+    color = res.max()
     res[x,y] = color
 #    res[x+1,y] = color
 #    res[x-1,y] = color
@@ -66,8 +71,8 @@ fig = plt.figure()
 
 ax = fig.add_subplot(1,2,1)
 
-imgplot = ax.imshow(disp_img2)
-#imgplot = ax.imshow(norm2(pi2R.lines2d.y_data))
+#imgplot = ax.imshow(disp_img2)
+imgplot = ax.imshow(norm2(pi2R.lines2d.y_data))
 
 rectangle = ax.add_patch(Rectangle((0, 0),2*N,2*N,alpha=0.2))
 
@@ -79,21 +84,27 @@ ax3d = fig.add_subplot(1,2,2, projection='3d')
 msize = 1
 hls_r, = ax3d.plot([], [], 'r.', markersize=msize)
 hls_b, = ax3d.plot([], [], 'b.', markersize=msize)
+hls_y, = ax3d.plot([], [], 'k.', markersize=msize)
 ax3d.set_xlabel('H')
 ax3d.set_ylabel('L')
 ax3d.set_zlabel('S')
 
 r_x, r_y = 0, 0
+r_data = []
 def set_rectangle_xy(x,y, N):
-    global r_x, r_y
+    global r_x, r_y, r_data
     x, y = int(x), int(y)
     r_x, r_y = x, y
     n_hls1 = img1_hls[y-N:y+N,x-N:x+N].reshape(4*N*N,3)
     n_hls2 = img2_hls[y-N:y+N,x-N:x+N].reshape(4*N*N,3)
+    r_data = pi2R.lines2d.y_data[y-N:y+N,x-N:x+N].reshape(4*N*N)
     hls_b.set_data(n_hls1[:,0]/360., n_hls1[:,1])
     hls_b.set_3d_properties(n_hls1[:,2])
     hls_r.set_data(n_hls2[:,0]/360., n_hls2[:,1])
     hls_r.set_3d_properties(n_hls2[:,2])
+    hls_y.set_data(r_data, r_data*0)
+    hls_y.set_3d_properties(r_data*0)
+
     rectangle.set_width(2*N)
     rectangle.set_height(2*N)
     rectangle.set_xy(np.array([x-N,y-N]))
@@ -130,9 +141,10 @@ def onbutton(event):
 
     disp_img2, xy = transform(disp_img, img1_hls, img2_hls, r_t)
     imgplot.set_data(norm2(disp_img2))
+#    imgplot.set_data(norm2(pi2R.lines2d.y_data))
     fig.canvas.draw()
     print 'r_t:',r_t
-
+    print 'r_data:', r_data.max(), r_data.min()
 
     set_rectangle_xy(r_x,r_y, N)
     print 'key=', event.key, 'event=', event
