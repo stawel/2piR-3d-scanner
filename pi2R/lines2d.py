@@ -42,7 +42,7 @@ kt = 1.8
 kernel = np.outer(signal.gaussian(kernel_size_y,kt,),signal.gaussian(kernel_size_x,kt,))
 kernel.astype(np.float32)
 
-def transform(img1, img2, t=3):
+def transform_(img1, img2, t=3):
     global kernel, y_data
     start = timer()
     h1,l1,s1 = split(img1)
@@ -77,6 +77,62 @@ def transform(img1, img2, t=3):
     print 'transform time:',end - start
 
     return mask_not, (x,y)
+
+
+##########################################################
+from scipy.signal import butter, lfilter, freqz, filtfilt
+import scipy.ndimage as ndimage
+import scipy.signal as signal
+
+def butter_lowpass(cutoff, fs, order=5):
+    nyq = 0.5 * fs
+    normal_cutoff = cutoff / nyq
+    b, a = butter(order, normal_cutoff, btype='low')#, analog=False)
+    return b, a
+
+b, a = butter_lowpass(3.667, 30, order=8)
+
+def filter(div):
+    b, a = butter_lowpass(3.667, 30, order=8)
+    ydiv = filtfilt(b, a, div)
+    return ydiv
+
+def filter2(div, size = 10):
+
+    kernel = np.ones((size,size), dtype=np.float32)
+    ydiv = signal.fftconvolve(div, kernel, mode='same')
+    return ydiv/(size*size)
+
+
+def transform(img1, img2, t=3):
+    global kernel, y_data
+    h1,l1,s1 = split(img1)
+    h2,l2,s2 = split(img2)
+
+    y_t_data = l2-l1
+    ydiv = filter2(l1, 15)+0.05
+    y_t_data /= ydiv
+    (y_size,x_size) = y_t_data.shape
+
+    y_t_data = filtfilt(b, a, y_t_data, axis=1)
+    y_t_data[:,0:10] = 0.
+    y_t_data[:,-10:] = 0.
+    y_t_data[0:10,:] = 0.
+    y_t_data[-10:,:] = 0.
+
+    x = np.argmax(y_t_data, axis=1)
+    y = np.arange(0, y_size)
+    y_data = y_t_data
+
+    mask = y_data[y,x] > 0.1
+#    print mask
+
+#    np.set_printoptions(threshold=np.nan)
+#    print x.shape
+#    print y.shape
+    return [], (y[mask],x[mask])
+
+####################################################3
 
 def get_points_2d_g(img1, img2):
     start = timer()

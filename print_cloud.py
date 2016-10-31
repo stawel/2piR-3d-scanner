@@ -11,7 +11,7 @@ pc = PointCloud()
 
 filename = 'points2d.dat'
 filename = 'a6.dat'
-filename = 'a5.dat'
+filename = 'a7.dat'
 
 
 

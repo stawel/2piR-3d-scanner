@@ -13,10 +13,12 @@ import Queue
 
 path = "./scans/p2/"
 extension = '.png'
-out_filename = 'a5.dat'
-threads = 12
+out_filename = 'a7.dat'
+threads = 20
 
 retu = []
+
+start_time = timer()
 
 work_queue = Queue.Queue()
 result_queue = Queue.Queue()
@@ -51,3 +53,5 @@ while not result_queue.empty():
 
 with open(out_filename, 'wb') as output:
     cPickle.dump(retu, output, cPickle.HIGHEST_PROTOCOL)
+
+print 'total time:', timer() - start_time
