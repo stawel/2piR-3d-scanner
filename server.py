@@ -24,6 +24,7 @@ i = 10000
 
 path = './scans/s/'
 extension = '.tif'
+extension = '.png'
 if not os.path.exists(path):
     os.mkdir(path)
 
@@ -124,7 +125,12 @@ def image_bayer_small(stream):
         1: 6404096,
         2: 10270208,
         }[ver]
-    data = stream.getvalue()[-offset:]
+
+    data_stream = stream.getvalue()
+    if(data_stream[:4] == 'BRCM'):
+        data = data_stream
+    else:
+        data = data_stream[-offset:]
     assert data[:4] == 'BRCM'
     data = data[32768:]
     data = np.fromstring(data, dtype=np.uint8)
@@ -142,56 +148,17 @@ def image_bayer_small(stream):
     data = np.delete(data, np.s_[4::5], 1)
 
 #    print 'bayer2:',data[1000,1000:1020]
-    rgb = np.zeros(data.shape + (3,), dtype=data.dtype)
-    rgb[1::2, 0::2, 0] = data[0::2, 1::2] # Blue
-    rgb[0::2, 0::2, 1] = data[0::2, 0::2] # Green
-    rgb[1::2, 1::2, 1] = data[1::2, 1::2] # Green
-    rgb[0::2, 1::2, 2] = data[1::2, 0::2] # Red
+    (y,x) = data.shape
+    rgb = np.zeros((y/2,x/2,3), dtype=data.dtype)
+    rgb[:, :, 0] = data[0::2, 1::2]*2 # Blue
+    rgb[:, :, 1] = data[0::2, 0::2]   # Green
+    rgb[:, :, 1] += data[1::2, 1::2]  # Green
+    rgb[:, :, 2] = data[1::2, 0::2]*2 # Red
 
-    bayer = np.zeros(rgb.shape, dtype=np.uint8)
-    bayer[1::2, 0::2, 0] = 1 # Red
-    bayer[0::2, 0::2, 1] = 1 # Green
-    bayer[1::2, 1::2, 1] = 1 # Green
-    bayer[0::2, 1::2, 2] = 1 # Blue
+    print data.shape
+    print rgb.shape
 
-    output = np.empty(rgb.shape, dtype=rgb.dtype)
-    window = (3, 3)
-    borders = (window[0] - 1, window[1] - 1)
-    border = (borders[0] // 2, borders[1] // 2)
-
-    rgb_pad = np.zeros((
-        rgb.shape[0] + borders[0],
-        rgb.shape[1] + borders[1],
-        rgb.shape[2]), dtype=rgb.dtype)
-    rgb_pad[
-        border[0]:rgb_pad.shape[0] - border[0],
-        border[1]:rgb_pad.shape[1] - border[1],
-        :] = rgb
-    rgb = rgb_pad
-
-    bayer_pad = np.zeros((
-        bayer.shape[0] + borders[0],
-        bayer.shape[1] + borders[1],
-        bayer.shape[2]), dtype=bayer.dtype)
-    bayer_pad[
-        border[0]:bayer_pad.shape[0] - border[0],
-        border[1]:bayer_pad.shape[1] - border[1],
-        :] = bayer
-    bayer = bayer_pad
-
-    for plane in range(3):
-        p = rgb[..., plane]
-        b = bayer[..., plane]
-        pview = as_strided(p, shape=(
-            p.shape[0] - borders[0],
-            p.shape[1] - borders[1]) + window, strides=p.strides * 2)
-        bview = as_strided(b, shape=(
-            b.shape[0] - borders[0],
-            b.shape[1] - borders[1]) + window, strides=b.strides * 2)
-        psum = np.einsum('ijkl->ij', pview)
-        bsum = np.einsum('ijkl->ij', bview)
-        output[..., plane] = psum // bsum
-    return output<<6
+    return rgb<<5
 
 def get_img():
     image_type, image_len, image_stream =  get_img_raw()
@@ -199,10 +166,10 @@ def get_img():
         return image_len, None
 
     if image_type == 1:
-        return image_len, image_bayer(image_stream)
+        return image_len, image_bayer_small(image_stream)
     else:
         data = np.fromstring(image_stream.getvalue(), dtype=np.uint8)
-        image = cv2.imdecode(data,cv2.IMREAD_COLOR)
+        image = cv2.imdecode(data, cv2.IMREAD_UNCHANGED)
         return image_len, image
 
 
