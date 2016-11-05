@@ -175,7 +175,9 @@ def get_img():
 
 try:
     while True:
-        k = cv2.waitKey(1) & 0xFF
+        for i in range(0,10):
+            k = cv2.waitKey(1) & 0xFF
+
         if k == 27:
             break
 

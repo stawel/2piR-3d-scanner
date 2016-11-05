@@ -91,6 +91,7 @@ def butter_lowpass(cutoff, fs, order=5):
     return b, a
 
 b, a = butter_lowpass(3.667, 30, order=8)
+#b, a = signal.iirfilter(27, [0.25, 0.920], btype='band')
 
 def filter(div):
     b, a = butter_lowpass(3.667, 30, order=8)
@@ -121,9 +122,13 @@ def transform(img1, img2, t=3):
     h2,l2,s2 = split(img2)
 
     y_t_data = l2-l1
-    ydiv = filter2(l1, 15)+0.05
+    ydiv = filter2(l1, 15)+0.03
     y_t_data /= ydiv
     (y_size,x_size) = y_t_data.shape
+
+#    a, b = 1.0, signal.firwin(80, [0.06, 0.83], pass_zero=False)
+#    a, b = 1.0, signal.firwin(80, [0.06, 0.53], pass_zero=False)
+#    print b,a
 
     y_t_data = filtfilt(b, a, y_t_data, axis=1)
     y_t_data[:,0:10] = 0.
@@ -133,9 +138,10 @@ def transform(img1, img2, t=3):
 
     x = np.argmax(y_t_data, axis=1)
     y = np.arange(0, y_size)
+#    print x
     y_data = y_t_data
 
-    mask = y_data[y,x] > 0.1
+    mask = y_data[y,x] > 0.2
 #    print mask
 
 #    np.set_printoptions(threshold=np.nan)

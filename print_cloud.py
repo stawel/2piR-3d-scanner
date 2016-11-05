@@ -6,12 +6,15 @@ from pi2R.lines import *
 from pi2R.point_cloud import *
 import math
 import cPickle
+from fractions import Fraction
+
 
 pc = PointCloud()
 
 filename = 'points2d.dat'
 filename = 'a6.dat'
-filename = 'a8.dat'
+filename = 'a10.dat'
+filename = 'a14.dat'
 
 
 
@@ -44,9 +47,21 @@ def set_points(x = 0.50):
         cam_laser.rotate(alfa)
         rp = cam_laser.compute_points_3d(p2d.copy())
         print i, len(rp), len(colors), 'alfa=', alfa
-        c = colors.astype(int)*2
+        awb = (Fraction(141, 128), Fraction(431, 256))
+        c = colors.astype(int)*[1.,float(awb[0]),float(awb[1])]
         c[c>255] = 255
         pc.addPoints(rp, c)
+
+#time total: 2.7085518837  pt: 1.60691690445 3.2901763916e-05 0.0562801361084 1.04532194138
+#awb_gains: (Fraction(323, 256), Fraction(53, 32))
+#exposure_speed: 365524
+#brightness: 50
+#digital_gain: 1
+#contrast: 0
+#analog_gain: 1
+#sharpness: 0
+#current time: 1478211721.39 qsize: 0
+
 
 def callback(obj, event):
     v = pc.getSliderValue(obj)

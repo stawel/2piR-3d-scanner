@@ -11,9 +11,9 @@ import threading
 import Queue
 
 
-path = "./scans/p2/"
+path = "./scans/p5/"
 extension = '.png'
-out_filename = 'a8.dat'
+out_filename = 'a14.dat'
 threads = 8
 
 retu = []
@@ -36,7 +36,7 @@ def worker_thread():
         work_queue.task_done()
 
 
-for i in range(10000,15860,2):
+for i in range(10000,13430,2):
     work_queue.put(i)
 
 for i in range(1, threads):
