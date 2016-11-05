@@ -10,19 +10,16 @@ from matplotlib.patches import Rectangle
 from matplotlib.collections import PatchCollection
 import matplotlib
 import pi2R.lines2d
+import pi2R.path_io
 
 file_nr = 11400
 #file_nr = 11780
-file_nr = 12000
+file_nr = 11000
 
 
-path = './scans/p2/'
-path = './scans/p5/'
-extension = '.png'
-
+path_info  = pi2R.path_io.PathInfo('./scans/q1/')
 
 N = 5
-
 
 def transform(disp_img, img1, img2, t=25):
     res = disp_img.copy()
@@ -49,18 +46,11 @@ def norm2(a):
 
 def open_img(file_nr):
     global disp_img, disp_img2, img1, img1_hls, img2, img2_hls
-    name1 = path + str(file_nr) + extension
-    name2 = path + str(file_nr+1) + extension
 
-    img1 = cv2.imread(name1,cv2.IMREAD_UNCHANGED)
-#    img1 = cv2.fastNlMeansDenoisingColored(img1,None,10,10,7,21)
-    img1 = img1.astype(np.float32)/float(np.iinfo(img1.dtype).max)
+    img1 = path_info.open_normal_img(file_nr)
     img1_hls = cv2.cvtColor(img1, cv2.COLOR_BGR2HLS)/[360.,1.,1.]
 
-
-    img2 = cv2.imread(name2,cv2.IMREAD_UNCHANGED)
-#    img2 = cv2.fastNlMeansDenoisingColored(img2,None,10,10,7,21)
-    img2 = img2.astype(np.float32)/float(np.iinfo(img2.dtype).max)
+    img2 = path_info.open_laser_img(file_nr)
     img2_hls = cv2.cvtColor(img2, cv2.COLOR_BGR2HLS)/[360.,1.,1.]
 
     img1_hls[img1_hls[:,:,0]>0.5]-=[1.,0.,0.]

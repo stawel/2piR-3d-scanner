@@ -14,7 +14,7 @@ pc = PointCloud()
 filename = 'points2d.dat'
 filename = 'a6.dat'
 filename = 'a10.dat'
-filename = 'a14.dat'
+filename = 'a15.dat'
 
 
 
@@ -47,8 +47,9 @@ def set_points(x = 0.50):
         cam_laser.rotate(alfa)
         rp = cam_laser.compute_points_3d(p2d.copy())
         print i, len(rp), len(colors), 'alfa=', alfa
-        awb = (Fraction(141, 128), Fraction(431, 256))
-        c = colors.astype(int)*[1.,float(awb[0]),float(awb[1])]
+        awb = (Fraction(249, 256), Fraction(229, 128))
+        w = 5.
+        c = colors.astype(int)*[w,w*float(awb[0]),w*float(awb[1])]
         c[c>255] = 255
         pc.addPoints(rp, c)
 

@@ -4,6 +4,8 @@ import numpy as np
 import cv2
 from pi2R.lines import *
 from pi2R.point_cloud import *
+from pi2R.path_io import *
+
 import math
 import cPickle
 from timeit import default_timer as timer
@@ -11,12 +13,13 @@ import threading
 import Queue
 
 
-path = "./scans/p5/"
-extension = '.png'
-out_filename = 'a14.dat'
+path = "./scans/q1/"
+out_filename = 'a16.dat'
 threads = 8
 
 retu = []
+
+path_info = PathInfo(path)
 
 start_time = timer()
 
@@ -27,7 +30,7 @@ def worker_thread():
     while not work_queue.empty():
         start = timer()
         i = work_queue.get()
-        line = Line(path + str(i) + extension, path + str(i+1) + extension)
+        line = Line(path_info, i)
         rp = line.get_points_2d()
         colors = line.get_colors_rgb()*255.
         colors[colors>255] = 255
@@ -35,8 +38,7 @@ def worker_thread():
         result_queue.put([i,np.asarray(rp, dtype=np.float32), np.asarray(colors, dtype=np.uint8)])
         work_queue.task_done()
 
-
-for i in range(10000,13430,2):
+for i in path_info.indexes():
     work_queue.put(i)
 
 for i in range(1, threads):

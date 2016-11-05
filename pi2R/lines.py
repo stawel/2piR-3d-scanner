@@ -104,16 +104,10 @@ class CamLaser:
         return np.asarray(retu)
 
 class Line:
-    def __init__(self, normal_image_name, laser_image_name):
-        self.n_img_name = normal_image_name
-        self.n_img = cv2.imread(normal_image_name, cv2.IMREAD_UNCHANGED)
-        self.n_img = self.n_img.astype(np.float32)/float(np.iinfo(self.n_img.dtype).max)
-        #self.n_img = cv2.GaussianBlur(self.n_img,(15,5),0)
-        self.l_img = cv2.imread(laser_image_name, cv2.IMREAD_UNCHANGED)
-        self.l_img = self.l_img.astype(np.float32)/float(np.iinfo(self.l_img.dtype).max)
-
-        #self.l_img = cv2.GaussianBlur(self.l_img,(15,5),0)
-
+    def __init__(self, path_info, index):
+        self.n_img_name = path_info.get_normal_filename(index)
+        self.n_img = path_info.open_normal_img(index)
+        self.l_img = path_info.open_laser_img(index)
 
     def get_points_2d_(self):
         (x,y) = lines2d.get_points_2d_g(self.n_img, self.l_img)
