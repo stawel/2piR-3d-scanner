@@ -14,8 +14,8 @@ laser_init()
 laser(1)
 x=2048*3
 x/=4
-#x/=8
-stepper_goto(-x,-1)
+x/=8
+stepper_goto(x,1)
 #laser(0)
 #stepper_goto(600,1)
 #laser(1)

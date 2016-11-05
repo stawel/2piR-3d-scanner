@@ -14,10 +14,15 @@ from fractions import Fraction
 from pi2R.hardware import *
 import threading
 import Queue
+import os
+
 
 
 img_type = 2
 img_type = 1 #bayer
+write_to_file = True
+path = './s/'
+
 
 sensor_version = 1
 
@@ -35,13 +40,25 @@ connection = client_socket.makefile('wb')#, 20*1000*1000)
 network_queue = Queue.Queue()
 
 def network_thread():
+    file_nr = 10000
+    skip = 1
+    if write_to_file:
+        skip = 5
+        if not os.path.exists(path):
+            os.mkdir(path)
+
     while True:
         r = network_queue.get()
         length = len(r)
-        connection.write(struct.pack('<L', img_type))
-        connection.write(struct.pack('<L', length))
-        t3 = time.time()
-        connection.write(r)
+        if write_to_file:
+            f = open(path+str(file_nr) + '.bayer', 'w')
+            f.write(r)
+            f.close()
+        if file_nr % skip == 0:
+            connection.write(struct.pack('<L', img_type))
+            connection.write(struct.pack('<L', length))
+            connection.write(r)
+        file_nr+=1
         network_queue.task_done()
 
 worker = threading.Thread(target=network_thread)
@@ -113,15 +130,20 @@ def make_img(data_stream, stream):
 def make_img2(data_stream, stream):
     return data_stream
 
+
+t =1;
+if img_type == 1:
+    t = 20
+
 try:
-    camera = picamera.PiCamera(resolution=(2592,1944), framerate=Fraction(5, 1))
+    camera = picamera.PiCamera(resolution=(2592/t,1944/t), framerate=Fraction(5, 2))
     #camera.resolution = (640, 480)
 #    camera.resolution = (2592,1944)
     # Start a preview and let the camera warm up for 2 seconds
     laser(1)
     camera.start_preview()
 
-    camera.shutter_speed = 200*1000
+    camera.shutter_speed = 2*200*1000
 #    camera.contrast=100
 #    camera.brightness=45
 #    camera.sharpness=-100
@@ -190,8 +212,10 @@ try:
             pos+=1
             stepper_goto(pos,1, delay=0.7)
             laser(0)
-            while network_queue.qsize() > 3:
-                print 'waiting queue:', network_queue.qsize()
+            if network_queue.qsize() >= 6:
+                while network_queue.qsize() != 0:
+                    print 'waiting queue:', network_queue.qsize()
+                    time.sleep(1)
             time.sleep(0.3)
         else:
             laser(1)
