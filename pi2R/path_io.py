@@ -31,18 +31,22 @@ def image_bayer(stream):
         }[ver]
     data = data.reshape(reshape)[:crop[0], :crop[1]]
 
-    data = data.astype(np.uint16) << 2
-#    print 'bayer1:',data[1000,1000:1020]
+    res_y, res_x = crop
+    res_x = res_x*4/5
+    ndata = np.empty((res_y, res_x), dtype=np.uint16)
     for byte in range(4):
-        data[:, byte::5] |= ((data[:, 4::5] >> ((4 - byte) * 2)) & 0b11)
-    data = np.delete(data, np.s_[4::5], 1)
+        ndata[:, byte::4] = data[:,byte::5]
+
+    ndata <<= 2
+    for byte in range(4):
+        ndata[:, byte::4] |= ((data[:, 4::5] >> ((4 - byte) * 2)) & 0b11)
 
 #    print 'bayer2:',data[1000,1000:1020]
-    rgb = np.zeros(data.shape + (3,), dtype=data.dtype)
-    rgb[1::2, 0::2, 0] = data[0::2, 1::2] # Blue
-    rgb[0::2, 0::2, 1] = data[0::2, 0::2] # Green
-    rgb[1::2, 1::2, 1] = data[1::2, 1::2] # Green
-    rgb[0::2, 1::2, 2] = data[1::2, 0::2] # Red
+    rgb = np.zeros(ndata.shape + (3,), dtype=ndata.dtype)
+    rgb[1::2, 0::2, 0] = ndata[0::2, 1::2] # Blue
+    rgb[0::2, 0::2, 1] = ndata[0::2, 0::2] # Green
+    rgb[1::2, 1::2, 1] = ndata[1::2, 1::2] # Green
+    rgb[0::2, 1::2, 2] = ndata[1::2, 0::2] # Red
 
     bayer = np.zeros(rgb.shape, dtype=np.uint8)
     bayer[1::2, 0::2, 0] = 1 # Red
@@ -97,10 +101,7 @@ def image_bayer_small(stream):
         }[ver]
 
     data_stream = stream.read()
-    if(data_stream[:4] == 'BRCM'):
-        data = data_stream
-    else:
-        data = data_stream[-offset:]
+    data = data_stream[-offset:]
     assert data[:4] == 'BRCM'
     data = data[32768:]
     data = np.fromstring(data, dtype=np.uint8)
@@ -113,7 +114,7 @@ def image_bayer_small(stream):
 
     res_y, res_x = crop
     res_x = res_x*4/5
-    ndata = np.zeros((res_y, res_x), dtype=np.uint16)
+    ndata = np.empty((res_y, res_x), dtype=np.uint16)
     for byte in range(4):
         ndata[:, byte::4] = data[:,byte::5]
 
