@@ -131,6 +131,19 @@ def image_bayer_small(stream):
     return rgb
 
 
+def open_img(filename, extension, small = False):
+    if extension == '.bayer':
+        t = timer()
+        f = io.open(filename, "rb")
+        if small:
+            img = image_bayer_small(f)
+        else:
+            img = image_bayer(f)
+        f.close()
+    else:
+        img = cv2.imread(filename, cv2.IMREAD_UNCHANGED)
+    return img
+
 class PathInfo:
     def __init__(self, path):
         self.path = path
@@ -155,15 +168,7 @@ class PathInfo:
         return self.path + str(index + 1) + self.extension
 
     def open_img(self, filename):
-        if self.extension == '.bayer':
-            t = timer()
-            f = io.open(filename, "rb")
-            img = image_bayer_small(f)
-#            print 'open_img t:', timer() - t
-
-            f.close()
-        else:
-            img = cv2.imread(filename, cv2.IMREAD_UNCHANGED)
+        img = open_img(filename, self.extension, True)
         (y,x,d) = img.shape
         if x>y:
             img = cv2.transpose(img)

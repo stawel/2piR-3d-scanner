@@ -60,7 +60,7 @@ def get_img():
 
 try:
     while True:
-        for i in range(0,10):
+        for j in range(0,10):
             k = cv2.waitKey(1) & 0xFF
 
         if k == 27:
