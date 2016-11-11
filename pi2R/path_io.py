@@ -14,7 +14,7 @@ from scipy.signal import argrelmax, argrelmin
 from scipy.ndimage.filters import gaussian_filter,gaussian_filter1d
 from timeit import default_timer as timer
 
-def image_bayer(stream):
+def image_bayer2(stream):
     ver = 1
     offset = {
         1: 6404096,
@@ -92,6 +92,36 @@ def image_bayer(stream):
         bsum = np.einsum('ijkl->ij', bview)
         output[..., plane] = psum // bsum
     return output<<6
+
+def image_bayer(stream):
+    ver = 1
+    offset = {
+        1: 6404096,
+        2: 10270208,
+        }[ver]
+    data = stream.read()[-offset:]
+    assert data[:4] == 'BRCM'
+    data = data[32768:]
+    data = np.fromstring(data, dtype=np.uint8)
+
+    reshape, crop = {
+        1: ((1952, 3264), (1944, 3240)),
+        2: ((2480, 4128), (2464, 4100)),
+        }[ver]
+    data = data.reshape(reshape)[:crop[0], :crop[1]]
+
+    res_y, res_x = crop
+    res_x = res_x*4/5
+    ndata = np.empty((res_y, res_x), dtype=np.uint16)
+    for byte in range(4):
+        ndata[:, byte::4] = data[:,byte::5]
+
+    shift = 6
+    ndata <<= shift+2
+    for byte in range(4):
+        ndata[:, byte::4] |= ((data[:, 4::5] >> ((4 - byte) * 2)) & 0b11) << shift
+
+    return cv2.cvtColor(ndata, cv2.COLOR_BAYER_GR2BGR)
 
 def image_bayer_small(stream):
     ver = 1
