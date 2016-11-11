@@ -17,7 +17,7 @@ file_nr = 11400
 file_nr = 11000
 
 
-path_info  = pi2R.path_io.PathInfo('./scans/q1/')
+path_info  = pi2R.path_io.PathInfo('./scans/p1/')
 
 N = 5
 

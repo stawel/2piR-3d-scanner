@@ -7,7 +7,7 @@ import cv2
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
 import os
-import pi2R.io
+import pi2R.path_io
 
 # Start a socket listening for connections on 0.0.0.0:8000 (0.0.0.0 means
 # all interfaces)
@@ -51,7 +51,7 @@ def get_img():
         return image_len, None
 
     if image_type == 1:
-        return image_len, pi2R.io.image_bayer_small(image_stream)
+        return image_len, pi2R.path_io.image_bayer_small(image_stream)
     else:
         data = np.fromstring(image_stream.getvalue(), dtype=np.uint8)
         image = cv2.imdecode(data, cv2.IMREAD_UNCHANGED)

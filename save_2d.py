@@ -13,8 +13,8 @@ import threading
 import Queue
 
 
-path = "./scans/q1/"
-out_filename = 'a16.dat'
+path = "./scans/p1/"
+out_filename = 'a1.dat'
 threads = 8
 
 retu = []
@@ -41,7 +41,7 @@ def worker_thread():
 for i in path_info.indexes():
     work_queue.put(i)
 
-for i in range(1, threads):
+for i in range(0, threads):
     worker = threading.Thread(target=worker_thread)
     worker.setDaemon(True)
     worker.start()

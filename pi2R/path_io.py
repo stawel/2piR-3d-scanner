@@ -111,24 +111,24 @@ def image_bayer_small(stream):
         }[ver]
     data = data.reshape(reshape)[:crop[0], :crop[1]]
 
-    data = data.astype(np.uint16) << 2
-#    print 'bayer1:',data[1000,1000:1020]
+    res_y, res_x = crop
+    res_x = res_x*4/5
+    ndata = np.zeros((res_y, res_x), dtype=np.uint16)
     for byte in range(4):
-        data[:, byte::5] |= ((data[:, 4::5] >> ((4 - byte) * 2)) & 0b11)
-    data = np.delete(data, np.s_[4::5], 1)
+        ndata[:, byte::4] = data[:,byte::5]
 
-#    print 'bayer2:',data[1000,1000:1020]
-    (y,x) = data.shape
-    rgb = np.zeros((y/2,x/2,3), dtype=data.dtype)
-    rgb[:, :, 0] = data[0::2, 1::2]*2 # Blue
-    rgb[:, :, 1] = data[0::2, 0::2]   # Green
-    rgb[:, :, 1] += data[1::2, 1::2]  # Green
-    rgb[:, :, 2] = data[1::2, 0::2]*2 # Red
+    shift = 5
+    ndata <<= shift+2
+    for byte in range(4):
+        ndata[:, byte::4] |= ((data[:, 4::5] >> ((4 - byte) * 2)) & 0b11) << shift
 
-#    print data.shape
-#    print rgb.shape
+    rgb = np.zeros((res_y/2,res_x/2,3), dtype=ndata.dtype)
+    rgb[:, :, 0] = ndata[0::2, 1::2]*2 # Blue
+    rgb[:, :, 1] = ndata[0::2, 0::2]   # Green
+    rgb[:, :, 1] += ndata[1::2, 1::2]  # Green
+    rgb[:, :, 2] = ndata[1::2, 0::2]*2 # Red
 
-    return rgb<<5
+    return rgb
 
 
 class PathInfo:
@@ -156,8 +156,11 @@ class PathInfo:
 
     def open_img(self, filename):
         if self.extension == '.bayer':
+            t = timer()
             f = io.open(filename, "rb")
-            img = image_bayer(f)
+            img = image_bayer_small(f)
+#            print 'open_img t:', timer() - t
+
             f.close()
         else:
             img = cv2.imread(filename, cv2.IMREAD_UNCHANGED)
