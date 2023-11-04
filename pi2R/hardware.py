@@ -11,7 +11,7 @@ stepper_pin_C = 15
 stepper_pin_D = 8
 
 stepper_position = 0
-stepper_full_rotation=4096/2*3
+stepper_full_rotation=4096//2*3
 
 stepper_steps = [8+1, 4+8, 2+4, 1+2]
 

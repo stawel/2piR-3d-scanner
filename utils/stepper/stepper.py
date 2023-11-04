@@ -14,7 +14,7 @@ GPIO.setup(gpio_list, GPIO.OUT)
 
 
 def setStep(x):
-#    print 'x:' ,x
+#    print ('x:' ,x)
     GPIO.output(A, x&1)
     GPIO.output(B, x&2)
     GPIO.output(C, x&4)
@@ -28,7 +28,7 @@ def makeStep(x):
 
 
 for i in range(0,2560):
-    print 'step: ',i
+    print ('step: ',i)
     makeStep(-i)
     time.sleep(0.10)
     setStep(0)

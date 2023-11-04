@@ -74,7 +74,7 @@ try:
         i = i + 1
 
         height, width, channels = image.shape
-        print image_len, height, width, channels
+        print (image_len, height, width, channels)
 
 finally:
     connection.close()

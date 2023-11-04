@@ -132,7 +132,7 @@ def image_bayer_small(stream):
 
     data_stream = stream.read()
     data = data_stream[-offset:]
-    assert data[:4] == 'BRCM'
+    assert str(data[:4],'utf8') == 'BRCM'
     data = data[32768:]
     data = np.fromstring(data, dtype=np.uint8)
 
@@ -143,7 +143,7 @@ def image_bayer_small(stream):
     data = data.reshape(reshape)[:crop[0], :crop[1]]
 
     res_y, res_x = crop
-    res_x = res_x*4/5
+    res_x = res_x*4//5
     ndata = np.empty((res_y, res_x), dtype=np.uint16)
     for byte in range(4):
         ndata[:, byte::4] = data[:,byte::5]
@@ -153,7 +153,7 @@ def image_bayer_small(stream):
     for byte in range(4):
         ndata[:, byte::4] |= ((data[:, 4::5] >> ((4 - byte) * 2)) & 0b11) << shift
 
-    rgb = np.zeros((res_y/2,res_x/2,3), dtype=ndata.dtype)
+    rgb = np.zeros((res_y//2,res_x//2,3), dtype=ndata.dtype)
     rgb[:, :, 0] = ndata[0::2, 1::2]*2 # Blue
     rgb[:, :, 1] = ndata[0::2, 0::2]   # Green
     rgb[:, :, 1] += ndata[1::2, 1::2]  # Green
